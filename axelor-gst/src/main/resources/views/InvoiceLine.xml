@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<form name="gst-invoice-line-form" title="Invoice line"
+		model="com.axelor.apps.account.db.InvoiceLine" width="large"
+		onNew="action-account-invoice-line-onnew-group"
+		onLoad="action-attrs-account-invoice-line-onnew-onload,action-invoice-line-attrs-readonly-form">
+		<panel hideIf="!isTitleLine">
+			<field name="productName" colSpan="10" title="Title"
+				requiredIf="isTitleLine" />
+			<field name="isTitleLine" colSpan="2"
+				onChange="action-invoice-line-method-empty-line" widget="boolean-switch" />
+		</panel>
+		<panel-tabs hideIf="isTitleLine">
+			<panel name="informations" title="Information">
+				<field name="product" canEdit="false"
+					onChange="action-group-account-invoice-line-product-onchange,invoice-line-attrs,action-gst-tax"
+					form-view="product-form" grid-view="product-grid" domain="self.isModel = false" />
+				<field name="isTitleLine" colOffset="4" colSpan="2"
+					onChange="action-invoice-line-method-empty-line" widget="boolean-switch" />
+				<field name="productName" colSpan="12" requiredIf="!isTitleLine" />
+				<field name="qty" colSpan="3" required="true"
+					onChange="action-group-account-invoice-line-qty-onchange,invoice-line-attrs" />
+				<field name="unit" colSpan="3" canEdit="false" form-view="unit-form"
+					grid-view="unit-grid" />
+				<field name="price" colSpan="3" required="true"
+					onChange="action-invoice-line-method-onchange-price,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount,invoice-line-attrs"
+					hidden="true" />
+				<field name="inTaxPrice" colSpan="3" required="true"
+					onChange="action-invoice-line-method-onchange-intaxprice,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount"
+					hidden="true" />
+				<panel name="discount" colSpan="12">
+					<field name="discountTypeSelect" colSpan="3"
+						onChange="action-invoice-line-method-compute,action-invoice-line-attrs-discountamount-title,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount" />
+					<field name="discountAmount" colSpan="3"
+						onChange="action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount"
+						hideIf="discountTypeSelect == 3" />
+					<field name="priceDiscounted" colSpan="3" hidden="true" />
+				</panel>
+				<field name="taxLine"
+					onChange="action-invoice-line-method-convert-tax,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount"
+					grid-view="tax-line-grid" form-view="tax-line-form" />
+				<field name="exTaxTotal" colSpan="3" readonly="true" />
+				<field name="inTaxTotal" colSpan="3" readonly="true" />
+				<field name="taxEquiv" hidden="true" grid-view="tax-equiv-grid"
+					form-view="tax-equiv-form" />
+				<field name="invoice" hidden="true" />
+				<field name="companyExTaxTotal" hidden="true" />
+				<field name="companyInTaxTotal" hidden="true" />
+				<panel title="Description" colSpan="12">
+					<field name="description" showTitle="false" colSpan="12"
+						widget="html" x-lite="true" />
+				</panel>
+			</panel>
+			<panel name="accounting" title="Accounting">
+				<field name="account" onSelect="action-invoice-line-method-filter-account" />
+			</panel>
+			<panel name="budgetPanel" title="Budget"
+				if="__config__.app.isApp('budget')">
+				<field name="budget"
+					if="!__config__.app.getApp('budget').getManageMultiBudget()" />
+				<panel-related field="budgetDistributionList"
+					editable="true" colSpan="12"
+					if="__config__.app.getApp('budget').getManageMultiBudget()"
+					onChange="action-budget-validate-exceed-line-amount" />
+			</panel>
+			<panel name="projectPanel"
+				if="__config__.app.isApp('business-project') &amp;&amp; __config__.app.getApp('business-project').getProjectInvoiceLines()"
+				title="Business Project" if-module="axelor-business-project">
+				<field name="project" onSelect="action-invoice-line-attrs-domain-project"
+					form-view="project-form" grid-view="project-grid" />
+			</panel>
+			<panel name="analyticDistribution" title="Analytics" if-module="axelor-supplychain"
+				if="__config__.app.isApp('account') &amp;&amp; __config__.app.getApp('account').getManageAnalyticAccounting()"
+				onTabSelect="action-invoice-line-attrs-read-only-distribution-lines">
+				<field name="analyticDistributionTemplate"
+					if="__config__.app.getApp('account').getAnalyticDistributionTypeSelect() == 1" />
+				<button name="generateDistributionLinesButton" onClick="action-invoice-line-method-create-distribution"
+					title="Generate distribution lines" showIf="analyticDistributionTemplate != null"
+					if="__config__.app.getApp('account').getAnalyticDistributionTypeSelect() == 1" />
+				<panel-related field="analyticMoveLineList"
+					grid-view="analytic-move-line-distribution-grid" form-view="analytic-move-line-distribution-form"
+					colSpan="12" />
+			</panel>
+			<panel name="configuration" title="Configuration" if-module="axelor-supplychain"
+				if="__config__.app.isApp('supplychain')">
+				<field name="saleOrder"
+					if="__config__.app.isApp('supplychain') &amp;&amp; !__config__.app.getApp('supplychain').getManageInvoicedAmountByLine()"
+					if-module="axelor-supplychain" form-view="sale-order-form"
+					grid-view="sale-order-grid" />
+				<field name="saleOrderLine"
+					if="__config__.app.isApp('supplychain') &amp;&amp; __config__.app.getApp('supplychain').getManageInvoicedAmountByLine()"
+					if-module="axelor-supplychain" form-view="sale-order-line-invoice-form"
+					grid-view="sale-order-line-invoice-grid"
+					domain="(self.saleOrder.statusSelect = 3 OR self.saleOrder.statusSelect = 4 ) AND EXISTS(SELECT i FROM Invoice i WHERE i = :invoice AND self.saleOrder.clientPartner = i.partner )" />
+				<field name="purchaseOrderLine" if-module="axelor-supplychain"
+					if="__config__.app.isApp('supplychain')" form-view="purchase-order-line-form"
+					grid-view="purchase-order-line-grid" />
+			</panel>
+		</panel-tabs>
+		<panel colSpan="12" title="Other Details" css="panel-yellow">
+			<field name="hsbn" colSpan="6" />
+			<field name="netAmount" colSpan="6" />
+			<field name="gstRate" colSpan="6" />
+			<field name="igst" colSpan="6" />
+			<field name="sgst" colSpan="6" />
+			<field name="cgst" colSpan="6" />
+		</panel>
+	</form>
+
+	<action-method name="invoice-line-attrs">
+		<call class="com.axelor.gst.web.InvoiceLineController" method="setInvoiceItem" />
+	</action-method>
+
+	<action-method name="action-gst-tax">
+		<call class="com.axelor.gst.web.InvoiceLineController" method="setTaxLine" />
+	</action-method>
+
+	<action-record name="invoiceLine-get-amount"
+		model="com.axelor.apps.account.db.InvoiceLine">
+		<field name="hsbn" expr="eval: product.getHsbn()" />
+		<field name="price" expr="eval: product.getSalePrice()" />
+	</action-record>
+
+</object-views>

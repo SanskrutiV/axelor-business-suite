@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<grid model="com.axelor.apps.base.db.City" title="City" name="city-grid">
+		<field name="name" />
+		<field name="state" />
+		<field name="country" />
+	</grid>
+
+	<form model="com.axelor.apps.base.db.City" title="City" name="gst-city-form">
+		<panel colSpan="12" css="panel-blue" title="City">
+			<field name="name" />
+			<field name="state" onChange="action-country-select" />
+			<field name="country" />
+		</panel>
+	</form>
+
+	<action-record name="action-country-select" model="com.axelor.apps.base.db.City">
+		<field name="country" expr="eval: state.country" />
+	</action-record>
+</object-views>

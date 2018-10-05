@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<grid name="gst-product-grid" title="Products" model="com.axelor.apps.base.db.Product"
+		orderBy="code,name" x-row-height="80">
+		<toolbar>
+			<button name="btnCreateInvoice" title="Create Invoice" icon="fa-plus-square-o"
+				onClick="com.axelor.gst.web.ProductController:setSelectedProductsId" />
+			<button name="btnPrintProduct" title="Print" icon="fa-print"
+				onClick="com.axelor.gst.web.ProductController:getPrintIds,print-products" />
+		</toolbar>
+		<field name="code" x-bind="{{code|unaccent|uppercase}}" width="100" />
+		<field name="name" width="300" />
+		<field name="productCategory" form-view="product-category-form"
+			grid-view="product-category-grid" />
+		<field name="productFamily" form-view="product-family-form"
+			grid-view="product-family-grid" />
+		<field name="productTypeSelect" width="100" />
+		<field name="salePrice" x-scale="2" />
+		<field name="unit" width="70" form-view="unit-form" grid-view="unit-grid" />
+		<field name="internalDescription" widget="html" width="400" />
+		<button name="sendByEmail" title="Send Email" icon="fa-envelope"
+			onClick="action-send-by-email-with-template" />
+	</grid>
+
+
+	<form name="gst-product-form" title="Product"
+		model="com.axelor.apps.base.db.Product" onNew="action-group-base-product-onnew"
+		onLoad="action-group-product-onload" width="large">
+		<toolbar>
+			<button name="showProductSheet" title="Product sheet" icon="fa-print"
+				onClick="save,action-product-method-show-product-sheet" />
+			<button name="sendByEmail" title="Send Email" icon="fa-envelope"
+				onClick="action-send-by-email-with-template" />
+		</toolbar>
+		<panel name="main">
+			<panel colSpan="6">
+				<field name="fullName" showTitle="false" css="label-bold bold large"
+					colSpan="12">
+					<editor x-show-titles="false">
+						<field name="code" x-bind="{{code|unaccent|uppercase}}"
+							showTitle="false" colSpan="3" css="label-bold bold large"
+							placeholder="Code" />
+						<field name="name" showTitle="false" colSpan="9"
+							css="label-bold bold large" placeholder="Name" />
+					</editor>
+				</field>
+			</panel>
+			<panel colSpan="6">
+				<button name="$totalVariants" title="Total variants" showIf="isModel"
+					colSpan="4" icon="fa-tags" onClick="action-product-view-total-variants"
+					widget="info-button" />
+				<panel showTitle="false"
+					showIf="productTypeSelect == 'storable' &amp;&amp; id" colSpan="8"
+					if-module="axelor-stock" if="__config__.app.isApp('stock')">
+					<button name="$realQty" title="Real qty" colSpan="6"
+						icon="fa-building-o" onClick="action-stock-move-line-product-default-realized"
+						widget="info-button" />
+					<button name="$futureQty" title="Future qty" colSpan="6"
+						icon="fa-line-chart" onClick="action-stock-move-line-product-default-planned"
+						widget="info-button" />
+					<field name="isModel" hidden="true" />
+				</panel>
+			</panel>
+			<panel colSpan="2">
+				<field name="picture" showTitle="false" colSpan="12" widget="Image">
+					<viewer>
+					<![CDATA[
+			    		<img ng-show="record.picture" ng-src="{{$image('picture', 'content')}}" />
+          				<img ng-show="!record.picture" src="img/product-default.png" />
+					]]>
+					</viewer>
+				</field>
+				<field name="barCode" showTitle="false" colSpan="12" widget="Image"
+					if="__config__.app.getApp('base').getActivateBarCodeGeneration()" />
+				<field name="sequence" showIf="sequence.length &gt; 0"
+					colSpan="12" />
+			</panel>
+			<panel colSpan="10">
+
+				<panel name="productTypology" title="Product typology"
+					colSpan="6" colWidths="30%,70%">
+					<field name="productTypeSelect" colSpan="12"
+						onChange="action-group-base-product-producttype-onchange" />
+					<field name="productSubTypeSelect" colSpan="12"
+						showIf="productTypeSelect == 'storable'" if="__config__.app.isApp('production')" />
+					<field name="isShippingCostsProduct" colSpan="4"
+						hideIf="productTypeSelect == 'service'" />
+					<field name="isActivity"
+						showIf="productTypeSelect == 'service' &amp;&amp; !isShippingCostsProduct"
+						if-module="axelor-human-resource" if="__config__.app.isApp('employee')" />
+					<field name="procurementMethodSelect" colSpan="6"
+						requiredIf="productTypeSelect == 'storable'" onChange="action-product-record-tick-checkbox-purchasable" />
+					<field name="standardDelay" colSpan="12"
+						showIf="saleSupplySelect == 2 || saleSupplySelect == 3" hidden="true"
+						if-module="axelor-supplychain" if="__config__.app.isApp('supplychain')" />
+				</panel>
+				<panel name="categorization" title="Categorization" colSpan="6"
+					colWidths="30%,70%">
+					<field name="productFamily" canEdit="false" colSpan="12"
+						form-view="product-family-form" grid-view="product-family-grid" />
+					<field name="productCategory" canEdit="false" colSpan="12"
+						domain="self.productFamily = :productFamily" form-view="product-category-form"
+						grid-view="product-category-grid" onChange="get-product-gst-rate" />
+				</panel>
+				<panel colSpan="12">
+					<field name="inAti" colSpan="6"
+						onChange="action-product-attrs-change-title-based-on-inAti" />
+					<field name="isPack"
+						if="__config__.app.getApp('sale')?.getProductPackMgt()" hideIf="isShippingCostsProduct" />
+					<field name="expense" hidden="true" />
+				</panel>
+				<panel name="Barcode" readonlyIf="barCode != null"
+					if="__config__.app.getApp('base').getActivateBarCodeGeneration()"
+					title="Barcode" colSpan="12">
+					<field name="serialNumber" />
+					<field name="barcodeTypeConfig"
+						if="__config__.app.getApp('base').getEditProductBarcodeType()" />
+				</panel>
+			</panel>
+		</panel>
+
+		<panel colSpan="12">
+			<field name="hsbn" />
+			<field name="gstRate" colSpan="6" showTitle="true" />
+		</panel>
+
+		<panel-tabs title="Product specific attributes">
+			<panel name="sale" title="Sale" showTitle="false">
+				<panel title="Sales" colSpan="6">
+					<field name="sellable" colSpan="12" />
+					<field name="autoUpdateSalePrice" hideIf="!sellable" colSpan="12" />
+					<field name="salePrice" readonlyIf="autoUpdateSalePrice"
+						hideIf="!sellable" colSpan="12" />
+					<field name="saleCurrency" canEdit="false" hideIf="!sellable"
+						colSpan="12" form-view="currency-form" grid-view="currency-grid" />
+					<field name="saleSupplySelect" colSpan="12"
+						onChange="action-product-validate-sale-supply-select" hideIf="isShippingCostsProduct" />
+					<panel name="units" title="Units" colSpan="6">
+						<field name="unit" canEdit="false" colSpan="12" form-view="unit-form"
+							grid-view="unit-grid" />
+						<field name="salesUnit" canEdit="false" hideIf="!sellable"
+							colSpan="12" form-view="unit-form" grid-view="unit-grid"
+							if="__config__.app.getApp('sale')?.getManageSalesUnits()" />
+						<field name="purchasesUnit" canEdit="false" hideIf="!purchasable"
+							colSpan="12" form-view="unit-form" grid-view="unit-grid"
+							if="__config__.app.getApp('purchase')?.getManagePurchasesUnits()" />
+					</panel>
+					<panel title="Configurator" colSpan="12" showIf="configurator"
+						if-module="axelor-sale"
+						if="__config__.app.isApp('sale') &amp;&amp; __config__.app.getApp('sale')?.getEnableConfigurator()">
+						<field name="configurator" showTitle="false" form-view="configurator-form"
+							grid-view="configurator-grid" readonly="true" />
+					</panel>
+				</panel>
+				<panel colSpan="6">
+					<panel name="productDates" title="Product dates" colSpan="12">
+						<field name="startDate" colSpan="12" />
+						<field name="endDate" colSpan="12"
+							onChange="action-group-base-product-enddate-onchange" />
+					</panel>
+					<field name="isPrototype" showIf="productTypeSelect =='storable'" />
+					<field name="versionSelect" colSpan="12" />
+					<panel title="Multiple quantities" colSpan="12"
+						if="__config__.app.getApp('sale')?.getManageMultipleSaleQuantity()">
+						<field name="allowToForceSaleQty" />
+						<panel-related field="saleProductMultipleQtyList"
+							grid-view="product-multiple-qty-grid" form-view="product-multiple-qty-form"
+							colSpan="12" editable="true" />
+					</panel>
+				</panel>
+				<panel name="description" title="Description" colSpan="12">
+					<field name="description" showTitle="false" colSpan="12"
+						widget="html" />
+				</panel>
+				<panel name="internalDescription" title="Internal description"
+					colSpan="12">
+					<field name="internalDescription" showTitle="false" colSpan="12"
+						widget="html" />
+				</panel>
+			</panel>
+			<panel name="purchaseCosts" title="Purchase/Costs" showTitle="false">
+				<panel name="purchase" title="Purchases" colSpan="6">
+					<field name="purchasable" colSpan="12" />
+					<field name="purchasePrice" showIf="purchasable" colSpan="6" />
+					<field name="purchaseCurrency" canEdit="false" showIf="purchasable"
+						colSpan="6" form-view="currency-form" grid-view="currency-grid" />
+					<field name="defaultSupplierPartner" canEdit="false" showIf="purchasable"
+						colSpan="6" domain="self.isContact = false AND self.isSupplier = true"
+						form-view="partner-form" grid-view="partner-grid" />
+					<field name="supplierDeliveryTime" showIf="purchasable"
+						colSpan="6" />
+					<panel title="Multiple quantities" colSpan="12"
+						if="__config__.app.getApp('purchase')?.getManageMultiplePurchaseQuantity()">
+						<field name="allowToForcePurchaseQty" />
+						<panel-related field="purchaseProductMultipleQtyList"
+							grid-view="product-multiple-qty-grid" form-view="product-multiple-qty-form"
+							colSpan="12" editable="true" />
+					</panel>
+				</panel>
+				<panel name="costs" title="Costs" colSpan="6">
+					<field name="costPrice" colSpan="6" readonlyIf="costTypeSelect != 1"
+						onChange="action-product-record-compute-sale-price" />
+					<field name="costTypeSelect" colSpan="6"
+						onChange="action-product-group-cost-type-select-onchange" />
+					<field name="managPriceCoef" colSpan="12"
+						onChange="action-product-record-compute-sale-price" />
+					<field name="shippingCoef" onChange="action-product-group-cost-type-select-onchange"
+						showIf="!defShipCoefByPartner" if-module="axelor-purchase"
+						if="__config__.app.isApp('purchase')" />
+					<field name="defShipCoefByPartner" onChange="action-product-method-supplier-catalog-coeff"
+						if-module="axelor-purchase" if="__config__.app.isApp('purchase')" />
+				</panel>
+				<panel-related field="supplierCatalogList" form-view="supplier-catalog-form"
+					grid-view="supplier-catalog-grid" title="Suppliers catalog" showIf="purchasable"
+					colSpan="12" if-module="axelor-purchase" if="__config__.app.isApp('purchase')" />
+			</panel>
+			<panel name="accounting" title="Accounting">
+				<field name="isAnalyticCapture" colSpan="6" if-module="axelor-account"
+					if="__config__.app.isApp('account')" />
+				<field name="customsCodeNomenclature" canEdit="false"
+					if-module="axelor-stock" if="__config__.app.isApp('stock')" />
+				<panel-related field="accountManagementList"
+					form-view="account-management-form" grid-view="account-management-product-grid"
+					domain="self.typeSelect = 1" title="Accounting" showTitle="false"
+					colSpan="12" />
+			</panel>
+			<panel name="stock" title="Stock" showTitle="false"
+				showIf="productTypeSelect == 'storable'" if-module="axelor-stock"
+				if="__config__.app.isApp('stock')">
+				<panel name="procurementSettings" title="Procurement settings"
+					colSpan="12" if-module="axelor-supplychain" if="__config__.app.isApp('supplychain')">
+					<field name="excludeFromMrp" showIf="productTypeSelect == 'storable'"
+						colSpan="6" />
+					<field name="mrpFamily"
+						showIf="productTypeSelect == 'storable' &amp;&amp; !excludeFromMrp"
+						colSpan="6" canNew="true" />
+					<field name="inventoryTypeSelect" colSpan="6" />
+				</panel>
+				<panel colSpan="12" if-module="axelor-supplychain"
+					if="__config__.app.isApp('supplychain')">
+					<field name="controlOnReceipt" />
+					<button name="showAllStockMoveLine" title="Show all stock move"
+						colSpan="6" onClick="action-product-view-stock-move-line" />
+					<field name="avgPrice" />
+					<spacer />
+					<panel-dashlet colSpan="12" action="action-product-view-stock"
+						showIf="id" />
+					<panel-dashlet colSpan="12"
+						action="action-stock-report-for-product" showIf="id" />
+					<panel-dashlet colSpan="12"
+						action="action-stock-history-report-for-product" showIf="id" />
+				</panel>
+			</panel>
+			<panel name="productionInformations" title="Production information"
+				showTitle="false"
+				showIf="productTypeSelect == 'storable' &amp;&amp; (procurementMethodSelect == 'produce' || procurementMethodSelect == 'buyAndProduce')"
+				onTabSelect="action-product-attrs-readonly-create-production-order"
+				if-module="axelor-production" if="__config__.app.isApp('production')">
+				<panel-include view="product-production-form" />
+				<panel-dashlet colSpan="12"
+					action="action-product-view-production-process" showIf="id" />
+			</panel>
+			<panel name="trackingNumber" title="Tracking number" showTitle="false"
+				showIf="productTypeSelect != 'service'" if-module="axelor-stock"
+				if="__config__.app.isApp('stock')">
+				<panel colSpan="12">
+					<field name="hasWarranty" />
+					<field name="warrantyNbrOfMonths" showIf="hasWarranty" />
+					<field name="isPerishable" />
+					<field name="perishableNbrOfMonths" showIf="isPerishable" />
+					<field name="checkExpirationDateAtStockMoveRealization"
+						showIf="hasWarranty || isPerishable" />
+				</panel>
+				<panel colSpan="12">
+					<field name="trackingNumberConfiguration" canNew="true"
+						form-view="tracking-number-configuration-form" grid-view="tracking-number-configuration-grid" />
+				</panel>
+			</panel>
+			<panel name="variants" title="Variants" showTitle="false"
+				if="__config__.app.getApp('base').getManageProductVariants()">
+				<panel name="parentVariant" showIf="!parentProduct" colSpan="12">
+					<field name="productVariantConfig" colSpan="12" canSelect="false"
+						canNew="true">
+						<editor x-show-titles="false">
+							<field name="productVariantAttr1" canNew="true"
+								onChange="action-product-variant-config-attrs-domain,action-product-variant-config-record-reset-variant-value1"
+								form-view="product-variant-attr-form" grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue1Set" showIf="productVariantAttr1"
+								colSpan="6" widget="TagSelect" canNew="false"
+								onSelect="action-product-nested-product-variant-config-attrs-domain"
+								form-view="product-variant-value-form" grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr2" showIf="productVariantAttr1"
+								canNew="true"
+								onChange="action-product-variant-config-attrs-domain,action-product-variant-config-record-reset-variant-value2"
+								form-view="product-variant-attr-form" grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue2Set" showIf="productVariantAttr2"
+								colSpan="6" widget="TagSelect" canNew="false"
+								onSelect="action-product-nested-product-variant-config-attrs-domain"
+								form-view="product-variant-value-form" grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr3" showIf="productVariantAttr2"
+								canNew="true"
+								onChange="action-product-variant-config-attrs-domain,action-product-variant-config-record-reset-variant-value3"
+								form-view="product-variant-attr-form" grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue3Set" showIf="productVariantAttr3"
+								colSpan="6" widget="TagSelect" canNew="false"
+								onSelect="action-product-nested-product-variant-config-attrs-domain"
+								form-view="product-variant-value-form" grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr4" showIf="productVariantAttr3"
+								canNew="true"
+								onChange="action-product-variant-config-attrs-domain,action-product-variant-config-record-reset-variant-value4"
+								form-view="product-variant-attr-form" grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue4Set" showIf="productVariantAttr4"
+								colSpan="6" widget="TagSelect" canNew="false"
+								onSelect="action-product-nested-product-variant-config-attrs-domain"
+								form-view="product-variant-value-form" grid-view="product-variant-value-grid" />
+						</editor>
+					</field>
+					<button name="generateProductVariant" title="Generate product variants"
+						onClick="save,action-product-method-generate-product-variant" />
+					<field name="manageVariantPrice" />
+					<panel-dashlet colSpan="12"
+						action="action-product-view-product-variant" showIf="id" />
+				</panel>
+				<panel name="childVariant" showIf="parentProduct" colSpan="12">
+					<field name="productVariant" showTitle="false" canSelect="false">
+						<editor x-show-titles="false">
+							<field name="productVariantAttr1" showTitle="false"
+								readonly="true" form-view="product-variant-attr-form" grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue1" showTitle="false"
+								showIf="productVariantAttr1" widget="SuggestBox" form-view="product-variant-value-form"
+								grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr2" showTitle="false"
+								readonly="true" showIf="productVariantAttr1" form-view="product-variant-attr-form"
+								grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue2" showTitle="false"
+								showIf="productVariantAttr2" widget="SuggestBox" form-view="product-variant-value-form"
+								grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr3" showTitle="false"
+								readonly="true" showIf="productVariantAttr2" form-view="product-variant-attr-form"
+								grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue3" showTitle="false"
+								showIf="productVariantAttr3" widget="SuggestBox" form-view="product-variant-value-form"
+								grid-view="product-variant-value-grid" />
+							<field name="productVariantAttr4" showTitle="false"
+								readonly="true" showIf="productVariantAttr3" form-view="product-variant-attr-form"
+								grid-view="product-variant-attr-grid" />
+							<field name="productVariantValue4" showTitle="false"
+								showIf="productVariantAttr4" widget="SuggestBox" form-view="product-variant-value-form"
+								grid-view="product-variant-value-grid" />
+						</editor>
+					</field>
+					<field name="parentProduct" canEdit="false" form-view="product-form"
+						grid-view="product-grid" />
+					<panel-dashlet colSpan="12"
+						action="action-product-view-other-product-variant" showIf="parentProduct" />
+				</panel>
+				<button name="updateProductsPrices" title="Update products prices"
+					onClick="save,action-product-method-update-products-prices" />
+			</panel>
+			<panel name="links" title="Links" if-module="axelor-stock"
+				if="__config__.app.isApp('stock')" hideIf="isShippingCostsProduct"
+				showIf="id">
+				<panel-dashlet colSpan="12"
+					action="action-product-view-stock-move-line-incoming-planned"
+					showIf="id" />
+				<panel-dashlet colSpan="12"
+					action="action-product-view-stock-move-line-consumption-planned"
+					showIf="id" />
+				<panel-dashlet colSpan="12"
+					action="action-product-view-stock-move-line" showIf="id" />
+				<!-- <panel-dashlet action="action-product-view-supplier-requests-historical" 
+					colSpan="12" if-module="axelor-supplier-management"/> -->
+				<!-- <panel-dashlet action="action-product-view-purchase-order-line-in-progress" 
+					colSpan="12" if-module="axelor-purchase"/> -->
+				<!-- <panel-dashlet action="action-product-view-purchase-order-line-historical" 
+					colSpan="12" if-module="axelor-purchase"/> -->
+				<panel-dashlet colSpan="12"
+					action="action-product-view-stock-move-line-consumption-historical"
+					showIf="id" />
+			</panel>
+			<panel name="packaging" title="Packaging"
+				hideIf="isShippingCostsProduct || productTypeSelect =='service'">
+				<panel name="weight" title="Weight" colSpan="6">
+					<field name="weightUnit" canEdit="false" domain="self.unitTypeSelect = 1" />
+					<field name="grossWeight" />
+					<field name="netWeight" />
+				</panel>
+				<panel name="articleDimension" title="Article dimension"
+					colSpan="6">
+					<field name="lengthUnit" canEdit="false" domain="self.unitTypeSelect = 2" />
+					<field name="length" readonlyIf="diameter > 0"
+						onChange="action-product-record-calculate-volume-length" />
+					<field name="width" readonlyIf="diameter > 0"
+						onChange="action-product-record-calculate-volume-length" />
+					<field name="height"
+						onChange="action-product-record-calculate-volume-length, action-product-record-calculate-volume-diameter" />
+					<field name="diameter" readonlyIf="length > 0 || width > 0"
+						onChange="action-product-record-calculate-volume-diameter" />
+					<field name="articleVolume" readonly="true" />
+				</panel>
+			</panel>
+			<panel-related field="packLines" showIf="isPack"
+				if="__config__.app.getApp('sale')?.getProductPackMgt()" />
+		</panel-tabs>
+		<panel>
+			<field name="attrs" colSpan="12" />
+		</panel>
+
+		<panel-mail>
+			<mail-messages />
+		</panel-mail>
+	</form>
+
+
+	<action-method name="get-product-gst-rate">
+		<call class="com.axelor.gst.web.ProductController" method="setProductGstRate" />
+	</action-method>
+	<action-report output="Product" name="print-products"
+		design="product.rptdesign">
+		<param name="selectedProducts" expr="eval: selectedProducts" />
+		<param name="path" expr="eval: path" />
+	</action-report>
+
+</object-views>

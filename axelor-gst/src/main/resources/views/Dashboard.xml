@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<dashboard name="gst-dashboard" title="Welcome !!">
+		<dashlet action="chart:unpaid.invoices.chart" colSpan="6" />
+		<dashlet action="chart:paid.invoices.chart" colSpan="6" />
+		<dashlet action="chart:customer.state.chart" colSpan="6" />
+		<dashlet action="chart:invoice.status.chart" colSpan="6" />
+		<dashlet action="chart:invoice.status.amount.chart" colSpan="6" />
+		<dashlet action="older-invoice" colSpan="12" />
+	</dashboard>
+
+	<chart name="unpaid.invoices.chart" title="Unpaid Invoices per Customer"
+		onInit="action.unpaid.chart.set.date">
+
+		<search-fields>
+			<field name="to_date" type="date" title="To Date" />
+			<field name="from_date" type="date" title="From Date" />
+		</search-fields>
+
+		<dataset type="sql">
+    <![CDATA[	
+   			select count(gi.status_select) as total_invoices,gp.name as name from account_invoice gi,base_partner gp where gi.partner=gp.id and gi.status_select in (1,2) and gp.is_customer='t' and invoice_date between DATE(:to_date) and DATE(:from_date) group by gp.name;
+    ]]>
+    </dataset>
+		<category key="name" />
+		<series key="total_invoices" type="bar" />
+	</chart>
+
+	<chart name="paid.invoices.chart" title="Paid Invoices per Category per Product"
+		stacked="true" onInit="action.unpaid.chart.set.date">
+
+		<search-fields>
+			<field name="to_date" type="date" title="To Date" />
+			<field name="from_date" type="date" title="From Date" />
+		</search-fields>
+
+		<dataset type="sql">
+    <![CDATA[
+   			select gpc.name as name,count(gpc.name) as total_products,gp.name as product_name from account_invoice gi,base_product gp,base_product_category gpc,account_invoice_line gil where gi.status_select=3 and gil.invoice=gi.id and gil.product=gp.id and gp.product_category=gpc.id and gi.invoice_date between DATE(:to_date) and DATE(:from_date) group by gpc.name,gp.name;
+    ]]>
+    </dataset>
+		<category key="name" />
+		<series key="total_products" type="bar" groupBy="product_name" />
+	</chart>
+
+	<chart name="customer.state.chart" title="Customer per State">
+		<dataset type="sql">
+    <![CDATA[
+   			select count(gp.name) as total_customer, gs.name as name from base_partner gp,base_address ga,base_city gc,base_partner_address gpa,gst_state gs where gp.is_customer='t' and gpa.partner=gp.id and gpa.address=ga.id and ga.city=gc.id and gc.state=gs.id group by gs.name;
+    ]]>
+    </dataset>
+		<category key="name" />
+		<series key="total_customer" type="pie" />
+	</chart>
+
+	<chart name="invoice.status.amount.chart" title="Invoice per Status: Amount">
+		<dataset type="sql">
+		<![CDATA[
+				select gi.status_select as status,sum(gi.in_tax_total) as amount from account_invoice gi group by gi.status_select;
+		]]></dataset>
+		<category key="status" />
+		<series key="amount" type="bar"/>
+		<config name="colors" value="#95B721,#6B93E7,#E5B211,#C9391D" />
+	</chart>
+	
+	<chart name="invoice.status.chart" title="Invoice per Status">
+		<dataset type="sql">
+		<![CDATA[
+				select gi.status_select as status,count(gi.*) as total_invoice,(select count(id) from account_invoice) as total from account_invoice gi group by gi.status_select;
+		]]></dataset>
+		<category key="total_invoice" />
+		<series key="total" type="line" groupBy="status"/>
+	</chart>
+
+	<action-record model="com.axelor.apps.account.db.Invoice" name="action.unpaid.chart.set.date">
+		<field name="to_date" expr="eval: __date__?.withDayOfMonth(1)" />
+		<field name="from_date" expr="eval: __date__" />
+	</action-record>
+
+	<action-view name="older-invoice" title="Older Invoices"
+		model="com.axelor.apps.account.db.Invoice">
+		<view type="grid" name="invoice-grid" />
+		<domain>self.invoiceDate &lt; :date</domain>
+		<context name="date" expr="eval: __datetime__?.minusMonths(1)" />
+	</action-view>
+
+</object-views>
