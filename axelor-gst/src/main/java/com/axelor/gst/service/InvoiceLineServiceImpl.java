@@ -17,8 +17,13 @@ public class InvoiceLineServiceImpl implements InvoiceLineService {
   @Override
   public void calculateInvoiceItem(InvoiceLine invoiceLine, Invoice invoice) {
     Product product = invoiceLine.getProduct();
-    BigDecimal netAmount, sgst, cgst, igst, grossAmount;
+    BigDecimal netAmount = BigDecimal.ZERO;
+    BigDecimal sgst = BigDecimal.ZERO;
+    BigDecimal cgst = BigDecimal.ZERO;
+    BigDecimal igst = BigDecimal.ZERO;
+    BigDecimal grossAmount = BigDecimal.ZERO;
     BigDecimal gstRate = product.getGstRate();
+    String hsbn = product.getHsbn();
     netAmount = invoiceLine.getPrice().multiply(invoiceLine.getQty());
     invoiceLine.setExTaxTotal(netAmount);
     Company company = invoice.getCompany();
@@ -32,20 +37,23 @@ public class InvoiceLineServiceImpl implements InvoiceLineService {
       // invoiceLine.setInTaxTotal(grossAmount);
       return;
     }
+    if (gstRate != BigDecimal.ZERO) {
 
-    if (companyAddress.getState().equals(invoiceAddress.getState())) {
-      sgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
-      cgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
-      grossAmount = sgst.add(cgst).add(netAmount);
-      igst = new BigDecimal(0);
-    } else {
+      if (companyAddress.getState().equals(invoiceAddress.getState())) {
+        sgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
+        cgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
+        grossAmount = sgst.add(cgst).add(netAmount);
+        igst = new BigDecimal(0);
+      } else {
 
-      igst = netAmount.multiply(gstRate);
-      sgst = new BigDecimal(0);
-      cgst = new BigDecimal(0);
-      grossAmount = igst.add(netAmount);
+        igst = netAmount.multiply(gstRate);
+        sgst = new BigDecimal(0);
+        cgst = new BigDecimal(0);
+        grossAmount = igst.add(netAmount);
+      }
     }
 
+    invoiceLine.setHsbn(hsbn);
     invoiceLine.setCgst(cgst);
     invoiceLine.setIgst(igst);
     invoiceLine.setSgst(sgst);

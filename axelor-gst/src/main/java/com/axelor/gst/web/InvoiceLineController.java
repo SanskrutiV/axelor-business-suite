@@ -28,6 +28,7 @@ public class InvoiceLineController {
         response.setValue("igst", invoiceLine.getIgst());
         response.setValue("cgst", invoiceLine.getCgst());
         response.setValue("sgst", invoiceLine.getSgst());
+        response.setValue("hsbn", invoiceLine.getHsbn());
       }
       response.setValue("exTaxTotal", invoiceLine.getExTaxTotal());
       response.setValue("gstRate", invoiceLine.getGstRate());
@@ -38,6 +39,7 @@ public class InvoiceLineController {
       response.setValue("sgst", BigDecimal.ZERO);
       response.setValue("exTaxTotal", BigDecimal.ZERO);
       response.setValue("gstRate", BigDecimal.ZERO);
+      response.setValue("hsbn", invoiceLine.getHsbn());
     }
   }
 

@@ -3,6 +3,20 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 
+	<grid name="invoice-line-grid" title="Invoice lines"
+		model="com.axelor.apps.account.db.InvoiceLine" id="gst-invoice-line-grid-id">
+		<hilite color="default" strong="true" if="isTitleLine == true" />
+		<field name="productName" />
+		<field name="qty" aggregate="sum" />
+		<field name="price" x-scale="2" />
+		<field name="exTaxTotal" aggregate="sum" />
+		<field name="inTaxTotal" aggregate="sum" />
+		<field name="igst"/>
+		<field name="sgst"/>
+		<field name="cgst"/>
+	</grid>
+
+
 	<form name="gst-invoice-line-form" title="Invoice line"
 		model="com.axelor.apps.account.db.InvoiceLine" width="large"
 		onNew="action-account-invoice-line-onnew-group"
@@ -102,7 +116,6 @@
 		</panel-tabs>
 		<panel colSpan="12" title="Other Details" css="panel-yellow">
 			<field name="hsbn" colSpan="6" />
-			<field name="netAmount" colSpan="6" />
 			<field name="gstRate" colSpan="6" />
 			<field name="igst" colSpan="6" />
 			<field name="sgst" colSpan="6" />
