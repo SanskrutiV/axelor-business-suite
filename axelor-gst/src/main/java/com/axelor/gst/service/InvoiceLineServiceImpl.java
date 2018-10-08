@@ -32,32 +32,29 @@ public class InvoiceLineServiceImpl implements InvoiceLineService {
     }
     Address companyAddress = company.getAddress();
     Address invoiceAddress = invoice.getAddress();
-    if (invoiceAddress == null || companyAddress == null) {
-      // grossAmount = netAmount;
-      // invoiceLine.setInTaxTotal(grossAmount);
-      return;
-    }
-    if (gstRate != BigDecimal.ZERO) {
+    if (invoiceAddress != null && companyAddress != null) {
+      if (gstRate != BigDecimal.ZERO && companyAddress.getState() != null) {
 
-      if (companyAddress.getState().equals(invoiceAddress.getState())) {
-        sgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
-        cgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
-        grossAmount = sgst.add(cgst).add(netAmount);
-        igst = new BigDecimal(0);
-      } else {
+        if (companyAddress.getState().equals(invoiceAddress.getState())) {
+          sgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
+          cgst = netAmount.multiply(gstRate).divide(new BigDecimal(2));
+          grossAmount = sgst.add(cgst).add(netAmount);
+          igst = new BigDecimal(0);
+        } else {
 
-        igst = netAmount.multiply(gstRate);
-        sgst = new BigDecimal(0);
-        cgst = new BigDecimal(0);
-        grossAmount = igst.add(netAmount);
+          igst = netAmount.multiply(gstRate);
+          sgst = new BigDecimal(0);
+          cgst = new BigDecimal(0);
+          grossAmount = igst.add(netAmount);
+        }
       }
-    }
 
-    invoiceLine.setHsbn(hsbn);
-    invoiceLine.setCgst(cgst);
-    invoiceLine.setIgst(igst);
-    invoiceLine.setSgst(sgst);
-    invoiceLine.setInTaxTotal(grossAmount);
+      invoiceLine.setHsbn(hsbn);
+      invoiceLine.setCgst(cgst);
+      invoiceLine.setIgst(igst);
+      invoiceLine.setSgst(sgst);
+      invoiceLine.setInTaxTotal(grossAmount);
+    }
   }
 
   @Override

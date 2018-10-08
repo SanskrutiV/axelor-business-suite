@@ -3,11 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 	
-	<form name="gst-address-form" title="Address" model="com.axelor.apps.base.db.Address" 
+	<form name="address-form" id="address-form-gst" title="Address" model="com.axelor.apps.base.db.Address" 
 	onSave="action-group-base-address-onsave,save,action-base-address-method-update-lat-long"  onNew="default-address-record" width="large" >
 		<panel name="main" title="Address details" colSpan="12">
 			<field name="addressL7Country" onChange="action-address-record-clear-fields,action-record-clear-state" required="true" canEdit="false" form-view="country-form" grid-view="country-grid" colSpan="6"/>
-			<field name="state" onSelect="action-state-attrs-domain"/>
+			<field name="state" onSelect="action-state-attrs-domain" if="__config__.app.isApp('gst')" />
 			<field name="addressL2" x-bind="{{addressL2|uppercase}}" placeholder="e.g. Financial department, CEO"/>
 			<field name="addressL3" x-bind="{{addressL3|uppercase}}" placeholder="e.g. Building A, Entry 2, 2nd Floor, Door 2E"/>
 			<field name="addressL4" x-bind="{{addressL4|uppercase}}"/>
@@ -38,12 +38,12 @@
 	</form>
 
 	<action-attrs name="action-state-attrs-domain">
-		<attribute name="domain" if="addressL7Country" expr="eval: (addressL7Country ? &quot;self.country = :addressL7Country&quot; : &quot;&quot;)" for="state"/>
-		<attribute name="domain" if="!addressL7Country &amp;&amp; !zip" expr="eval: null" for="state"/>
+		<attribute name="domain" if="addressL7Country &amp;&amp; __config__.app.isApp('gst')" expr="eval: (addressL7Country ? &quot;self.country = :addressL7Country&quot; : &quot;&quot;)" for="state"/>
+		<attribute name="domain" if="!addressL7Country &amp;&amp; !zip &amp;&amp; __config__.app.isApp('gst')" expr="eval: null" for="state"/>
 	</action-attrs>
 	
 	<action-record name="action-record-clear-state" model="com.axelor.apps.base.db.Address">
-		<field name="state" expr="eval: null"/>
+		<field name="state" expr="eval: null" if="__config__.app.isApp('gst')"/>
 	</action-record>
 
 </object-views>

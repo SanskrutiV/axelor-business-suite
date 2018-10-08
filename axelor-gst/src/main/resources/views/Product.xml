@@ -3,9 +3,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 
-	<grid name="gst-product-grid" title="Products" model="com.axelor.apps.base.db.Product"
-		orderBy="code,name" x-row-height="80">
+	<grid name="product-grid" title="Products" model="com.axelor.apps.base.db.Product"
+		orderBy="code,name" x-row-height="80" id="product-grid-gst">
 		<toolbar>
+			<button name="catalog" title="Catalog" onClick="action-print-product-catalog"
+				icon="fa-book" />
+			<button name="checkDuplicate" title="Check Duplicate"
+				onClick="action-general-check-duplicate-records" />
 			<button name="btnCreateInvoice" title="Create Invoice" icon="fa-plus-square-o"
 				onClick="com.axelor.gst.web.ProductController:setSelectedProductsId" />
 			<button name="btnPrintProduct" title="Print" icon="fa-print"
@@ -26,7 +30,7 @@
 	</grid>
 
 
-	<form name="gst-product-form" title="Product"
+	<form name="product-form" id="product-form-gst" title="Product"
 		model="com.axelor.apps.base.db.Product" onNew="action-group-base-product-onnew"
 		onLoad="action-group-product-onload" width="large">
 		<toolbar>
@@ -103,7 +107,7 @@
 						form-view="product-family-form" grid-view="product-family-grid" />
 					<field name="productCategory" canEdit="false" colSpan="12"
 						domain="self.productFamily = :productFamily" form-view="product-category-form"
-						grid-view="product-category-grid" onChange="get-product-gst-rate" />
+						grid-view="product-category-grid" onChange="action-group-gst-product-set-gstrate" />
 				</panel>
 				<panel colSpan="12">
 					<field name="inAti" colSpan="6"
@@ -121,12 +125,10 @@
 				</panel>
 			</panel>
 		</panel>
-
-		<panel colSpan="12">
+		<panel colSpan="12" if="__config__.app.isApp('gst')">
 			<field name="hsbn" />
 			<field name="gstRate" colSpan="6" showTitle="true" />
 		</panel>
-
 		<panel-tabs title="Product specific attributes">
 			<panel name="sale" title="Sale" showTitle="false">
 				<panel title="Sales" colSpan="6">
@@ -414,6 +416,9 @@
 		</panel-mail>
 	</form>
 
+	<action-group name="action-group-gst-product-set-gstrate">
+		<action name="get-product-gst-rate" if="__config__.app.isApp('gst')" />
+	</action-group>
 
 	<action-method name="get-product-gst-rate">
 		<call class="com.axelor.gst.web.ProductController" method="setProductGstRate" />

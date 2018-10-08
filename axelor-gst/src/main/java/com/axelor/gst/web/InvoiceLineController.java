@@ -21,7 +21,6 @@ public class InvoiceLineController {
     Invoice invoice = request.getContext().getParent().asType(Invoice.class);
     if (invoiceLine.getProduct() != null) {
       invoiceLineService.updateInvoiceItem(invoiceLine);
-
       if (invoice.getAddress() != null) {
         invoiceLineService.calculateInvoiceItem(invoiceLine, invoice);
         response.setValue("inTaxTotal", invoiceLine.getInTaxTotal());
@@ -46,6 +45,8 @@ public class InvoiceLineController {
   public void setTaxLine(ActionRequest request, ActionResponse response) {
     InvoiceLine invoiceLine = request.getContext().asType(InvoiceLine.class);
     TaxLine taxLine = invoiceLineService.getTextLine(invoiceLine);
-    response.setValue("taxLine", taxLine);
+    if (taxLine != null) {
+      response.setValue("taxLine", taxLine);
+    }
   }
 }

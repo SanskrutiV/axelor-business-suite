@@ -20,7 +20,7 @@
 	<action-view name="gst.root.partner.partner" title="Partner"
 		model="com.axelor.apps.base.db.Partner">
 		<view type="grid" name="partner-grid" />
-		<view type="form" name="gst-partner-form" />
+		<view type="form" name="partner-form" />
 		<view type="cards" name="partner-cards" />
 		<domain>self.isContact != true</domain>
 		<context name="json-enhance" expr="true" />
@@ -43,14 +43,14 @@
 	<action-view name="gst.root.partner.configurations.address"
 		title="Address" model="com.axelor.apps.base.db.Address">
 		<view type="grid" name="address-grid" />
-		<view type="form" name="gst-address-form" />
+		<view type="form" name="address-form" />
 	</action-view>
 	<menuitem title="City" name="gst-root-partner-configurations-city"
 		parent="gst-root-partner-configurations" action="gst.root.partner.configurations.city" />
 	<action-view name="gst.root.partner.configurations.city"
 		title="City" model="com.axelor.apps.base.db.City">
 		<view type="grid" name="city-grid" />
-		<view type="form" name="gst-city-form" />
+		<view type="form" name="city-form" />
 	</action-view>
 	<menuitem title="State" name="gst-root-partner-configurations-state"
 		parent="gst-root-partner-configurations" action="gst.root.partner.configurations.state" />
@@ -73,8 +73,8 @@
 		parent="gst-root-product" action="gst.root.product.product" />
 	<action-view name="gst.root.product.product" title="Product"
 		model="com.axelor.apps.base.db.Product">
-		<view type="grid" name="gst-product-grid" />
-		<view type="form" name="gst-product-form" />
+		<view type="grid" name="product-grid" />
+		<view type="form" name="product-form" />
 		<view type="cards" name="product-cards" />
 		<context name="json-enhance" expr="true" />
 	</action-view>
@@ -83,7 +83,7 @@
 	<action-view name="gst.root.product.product.category"
 		title="Product Categories" model="com.axelor.apps.base.db.ProductCategory">
 		<view type="grid" name="productCategory-grid" />
-		<view type="form" name="gst-productCategory-form" />
+		<view type="form" name="productCategory-form" />
 	</action-view>
 
 
@@ -93,18 +93,18 @@
 		parent="gst-root-invoice" action="gst.root.invoice.invoice.create" />
 	<action-view name="gst.root.invoice.invoice.create" title="Create Invoice"
 		model="com.axelor.apps.account.db.Invoice">
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<context name="json-enhance" expr="true" />
 		<context name="_operationTypeSelect" expr="eval:3" />
 		<context name="todayDate" expr="eval:__config__.app.getTodayDate()" />
 	</action-view>
 
 	<menuitem title="Draft Invoices" name="gst-root-nvoice-draft-invoice"
-		parent="gst-root-invoice" action="gst.root.nvoice.draft.invoice" icon="fa-file" />
+		parent="gst-root-invoice" action="gst.root.nvoice.draft.invoice" />
 	<action-view name="gst.root.nvoice.draft.invoice" title="Draft Invoices"
 		model="com.axelor.apps.account.db.Invoice">
 		<view type="grid" name="invoice-grid" />
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<view type="kanban" name="invoice-kanban" />
 		<domain>self.statusSelect = 1</domain>
 		<context name="json-enhance" expr="true" />
@@ -112,12 +112,11 @@
 		<context name="todayDate" expr="eval:__config__.app.getTodayDate()" />
 	</action-view>
 	<menuitem title="Validated Invoices" name="gst-root-invoice-validated-invoice"
-		parent="gst-root-invoice" action="gst.root.invoice.validated.invoice"
-		icon="fa-file-text-o" />
+		parent="gst-root-invoice" action="gst.root.invoice.validated.invoice"/>
 	<action-view name="gst.root.invoice.validated.invoice"
 		title="Validated Invoices" model="com.axelor.apps.account.db.Invoice">
 		<view type="grid" name="invoice-grid" />
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<view type="kanban" name="invoice-kanban" />
 		<domain>self.statusSelect = 2</domain>
 		<context name="json-enhance" expr="true" />
@@ -125,11 +124,11 @@
 		<context name="todayDate" expr="eval:__config__.app.getTodayDate()" />
 	</action-view>
 	<menuitem title="Ventilated Invoices" name="gst-root-invoice-paid-invoice"
-		parent="gst-root-invoice" action="gst.root.invoice.paid.invoice" icon="fa-file" />
+		parent="gst-root-invoice" action="gst.root.invoice.paid.invoice" />
 	<action-view name="gst.root.invoice.paid.invoice" title="Paid Invoices"
 		model="com.axelor.apps.account.db.Invoice">
 		<view type="grid" name="invoice-grid" />
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<view type="kanban" name="invoice-kanban" />
 		<domain>self.statusSelect = 3</domain>
 		<context name="json-enhance" expr="true" />
@@ -137,12 +136,11 @@
 		<context name="todayDate" expr="eval:__config__.app.getTodayDate()" />
 	</action-view>
 	<menuitem title="Cancelled Invoices" name="gst-root-invoice-cancelled-invoice"
-		parent="gst-root-invoice" action="gst.root.invoice.cancelled.invoice"
-		icon="fa-minus-square" />
+		parent="gst-root-invoice" action="gst.root.invoice.cancelled.invoice"/>
 	<action-view name="gst.root.invoice.cancelled.invoice"
 		title="Cancelled Invoices" model="com.axelor.apps.account.db.Invoice">
 		<view type="grid" name="invoice-grid" />
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<view type="kanban" name="invoice-kanban" />
 		<domain>self.statusSelect = 4</domain>
 		<context name="json-enhance" expr="true" />
@@ -155,7 +153,7 @@
 	<action-view name="gst.root.invoice.all" title="Invoice"
 		model="com.axelor.apps.account.db.Invoice">
 		<view type="grid" name="invoice-grid" />
-		<view type="form" name="gst-invoice-form" />
+		<view type="form" name="invoice-form" />
 		<view type="kanban" name="invoice-kanban" />
 		<context name="json-enhance" expr="true" />
 		<context name="_operationTypeSelect" expr="eval:3" />
@@ -168,7 +166,7 @@
 	<action-view name="gst.root.company.company" title="Company"
 		model="com.axelor.apps.base.db.Company">
 		<view type="grid" name="company-grid" />
-		<view type="form" name="gst-company-form" />
+		<view type="form" name="company-form" />
 	</action-view>
 	<menuitem title="Bank Account" name="gst-root-company-bank"
 		parent="gst-root-company" action="gst.root.company.bank" />

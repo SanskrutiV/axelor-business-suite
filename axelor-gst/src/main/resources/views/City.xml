@@ -3,21 +3,40 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 
-	<grid model="com.axelor.apps.base.db.City" title="City" name="city-grid">
+	<grid model="com.axelor.apps.base.db.City" title="City" name="city-grid"
+		id="city-grid-gst">
+		<toolbar>
+			<button name="checkDuplicate" title="Check Duplicate"
+				onClick="action-base-method-show-duplicate" />
+			<button name="importCity" title="Import city"
+				onClick="action-base-view-import-city-popup" />
+		</toolbar>
 		<field name="name" />
-		<field name="state" />
-		<field name="country" />
+		<field name="state" if="__config__.app.isApp('gst')" />
+		<field name="zip" />
 	</grid>
 
-	<form model="com.axelor.apps.base.db.City" title="City" name="gst-city-form">
-		<panel colSpan="12" css="panel-blue" title="City">
+	<form name="city-form" title="City" model="com.axelor.apps.base.db.City"
+		width="large" id="city-form-gst">
+		<panel name="main">
 			<field name="name" />
-			<field name="state" onChange="action-country-select" />
-			<field name="country" />
+			<field name="artmin" colSpan="2" />
+			<field name="zip" colSpan="4" />
+			<field name="inseeCode" />
+			<field name="hasZipOnRight" />
+		</panel>
+		<panel name="localization" title="Localization">
+			<field name="country" form-view="country-form" grid-view="country-grid" />
+			<field name="state" onChange="action-country-from-state" if="__config__.app.isApp('gst')" />
+			<field name="department" form-view="department-form" grid-view="department-grid" />
+			<field name="canton" form-view="canton-form" grid-view="canton-grid" />
+		</panel>
+		<panel name="demography" title="Demography">
+			<field name="nbInhCommune" />
 		</panel>
 	</form>
 
-	<action-record name="action-country-select" model="com.axelor.apps.base.db.City">
-		<field name="country" expr="eval: state.country" />
+	<action-record name="action-country-from-state" model="com.axelor.apps.base.db.City">
+		<field name="country" expr="eval: state.country" if="__config__.app.isApp('gst')"/>
 	</action-record>
 </object-views>

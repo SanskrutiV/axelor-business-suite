@@ -3,12 +3,19 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 	
-	<form model="com.axelor.apps.base.db.ProductCategory" title="Product category"
-		name="gst-productCategory-form">
-		<panel-include view="product-category-form" />
-		<panel title="Gst Rate">
-			<field name="gstRate" showTitle="false" />
+	
+	<form name="product-category-form" title="Product category" model="com.axelor.apps.base.db.ProductCategory" width="large" id="product-category-form-gst">
+	    <toolbar>
+			<button name="viewProducts" title="View Products" onClick="action-view-product-by-category"/>
+		</toolbar>
+		<panel name="main" >
+        	<field name="name"/>
+        	<field name="code" x-bind="{{code|unaccent|uppercase}}" />
+	        <field name="productFamily"  form-view="product-family-form" grid-view="product-family-grid"/>
+	        <field name="parentProductCategory" form-view="product-category-form" grid-view="product-family-grid"/>
+	        <field name="gstRate" showTitle="false" if="__config__.app.isApp('gst')"/>
 		</panel>
-	</form>
+   		<panel-dashlet  title="Sales Turnover" action="dashlet.category.sales.turnover.per.month" colSpan="12" height="350" if-module="axelor-supplychain" if="__config__.app.isApp('supplychain')" />
+    </form>  
 	
 </object-views>

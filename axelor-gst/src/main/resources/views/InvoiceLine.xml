@@ -4,20 +4,20 @@
 	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
 
 	<grid name="invoice-line-grid" title="Invoice lines"
-		model="com.axelor.apps.account.db.InvoiceLine" id="gst-invoice-line-grid-id">
+		model="com.axelor.apps.account.db.InvoiceLine" id="invoice-line-grid-gst">
 		<hilite color="default" strong="true" if="isTitleLine == true" />
 		<field name="productName" />
 		<field name="qty" aggregate="sum" />
 		<field name="price" x-scale="2" />
 		<field name="exTaxTotal" aggregate="sum" />
 		<field name="inTaxTotal" aggregate="sum" />
-		<field name="igst"/>
-		<field name="sgst"/>
-		<field name="cgst"/>
+		<field name="igst" if="__config__.app.isApp('gst')" />
+		<field name="sgst" if="__config__.app.isApp('gst')" />
+		<field name="cgst" if="__config__.app.isApp('gst')" />
 	</grid>
 
 
-	<form name="gst-invoice-line-form" title="Invoice line"
+	<form name="invoice-line-form" title="Invoice line" id="invoice-line-form-gst"
 		model="com.axelor.apps.account.db.InvoiceLine" width="large"
 		onNew="action-account-invoice-line-onnew-group"
 		onLoad="action-attrs-account-invoice-line-onnew-onload,action-invoice-line-attrs-readonly-form">
@@ -30,17 +30,17 @@
 		<panel-tabs hideIf="isTitleLine">
 			<panel name="informations" title="Information">
 				<field name="product" canEdit="false"
-					onChange="action-group-account-invoice-line-product-onchange,invoice-line-attrs,action-gst-tax"
+					onChange="action-group-account-invoice-line-product-onchange,action-group-gst-invoice-line-attrs"
 					form-view="product-form" grid-view="product-grid" domain="self.isModel = false" />
 				<field name="isTitleLine" colOffset="4" colSpan="2"
 					onChange="action-invoice-line-method-empty-line" widget="boolean-switch" />
 				<field name="productName" colSpan="12" requiredIf="!isTitleLine" />
 				<field name="qty" colSpan="3" required="true"
-					onChange="action-group-account-invoice-line-qty-onchange,invoice-line-attrs" />
+					onChange="action-group-account-invoice-line-qty-onchange,action-group-gst-invoice-line-attrs" />
 				<field name="unit" colSpan="3" canEdit="false" form-view="unit-form"
 					grid-view="unit-grid" />
 				<field name="price" colSpan="3" required="true"
-					onChange="action-invoice-line-method-onchange-price,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount,invoice-line-attrs"
+					onChange="action-invoice-line-method-onchange-price,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount,action-group-gst-invoice-line-attrs"
 					hidden="true" />
 				<field name="inTaxPrice" colSpan="3" required="true"
 					onChange="action-invoice-line-method-onchange-intaxprice,action-invoice-line-method-compute,action-invoice-line-method-compute-analytic-distribution,action-budget-validate-exceed-line-amount"
@@ -114,7 +114,7 @@
 					grid-view="purchase-order-line-grid" />
 			</panel>
 		</panel-tabs>
-		<panel colSpan="12" title="Other Details" css="panel-yellow">
+		<panel colSpan="12" title="Other Details" css="panel-yellow" if="__config__.app.isApp('gst')">
 			<field name="hsbn" colSpan="6" />
 			<field name="gstRate" colSpan="6" />
 			<field name="igst" colSpan="6" />
@@ -123,18 +123,16 @@
 		</panel>
 	</form>
 
-	<action-method name="invoice-line-attrs">
+	<action-group name="action-group-gst-invoice-line-attrs">
+		<action name="action-invoice-line-attrs" if="__config__.app.isApp('gst')"/>
+		<action name="action-gst-tax" if="__config__.app.isApp('gst')"/>
+	</action-group>
+	
+	<action-method name="action-invoice-line-attrs">
 		<call class="com.axelor.gst.web.InvoiceLineController" method="setInvoiceItem" />
 	</action-method>
-
 	<action-method name="action-gst-tax">
 		<call class="com.axelor.gst.web.InvoiceLineController" method="setTaxLine" />
 	</action-method>
-
-	<action-record name="invoiceLine-get-amount"
-		model="com.axelor.apps.account.db.InvoiceLine">
-		<field name="hsbn" expr="eval: product.getHsbn()" />
-		<field name="price" expr="eval: product.getSalePrice()" />
-	</action-record>
 
 </object-views>
