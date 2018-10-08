@@ -26,29 +26,18 @@ public class InvoiceController {
       throws AxelorException {
     Invoice invoice = request.getContext().asType(Invoice.class);
     try {
-      invoice = invoiceService.calculateInvoice(invoice);
+      invoice = invoiceService.compute(invoice);
       response.setValues(invoice);
     } catch (Exception e) {
       TraceBackService.trace(response, e);
     }
-
-    /*
-     * invoice=invoiceService.calculateInvoice(invoice);
-     *
-     * response.setValue("invoiceItems", invoice.getInvoiceLineList());
-     * //response.setValue("exTaxTotal", invoice.getExTaxTotal());
-     * response.setValue("netIgst", invoice.getNetIgst());
-     * response.setValue("netSgst", invoice.getNetSgst());
-     * response.setValue("netCgst", invoice.getNetCgst());
-     *
-     * //response.setValue("inTaxTotal", invoice.getInTaxTotal());
-     */ }
+  }
 
   public void setInvoiceAttrs(ActionRequest request, ActionResponse response) {
     Invoice invoice = request.getContext().asType(Invoice.class);
     invoiceService.setInvoiceAttrs(invoice);
-    response.setValue("contactPartner", invoice.getContactPartner());
-    response.setValue("address", invoice.getAddress());
+    //response.setValue("contactPartner", invoice.getContactPartner());
+    //response.setValue("address", invoice.getAddress());
     response.setValue("shippingAddress", invoice.getShippingAddress());
   }
 
@@ -81,7 +70,6 @@ public class InvoiceController {
         invoiceLineTaxList.add(invoiceLineTax);
       }
       response.setValue("invoiceLineList", invoiceLineList);
-      response.setAttr("partner", "readonlyIf", false);
       response.setValue("invoiceLineTaxList", invoiceLineTaxList);
     }
   }

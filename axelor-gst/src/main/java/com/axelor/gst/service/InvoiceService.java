@@ -1,11 +1,8 @@
 package com.axelor.gst.service;
 
 import com.axelor.apps.account.db.Invoice;
-import com.axelor.exception.AxelorException;
 
-public interface InvoiceService {
-
-  Invoice calculateInvoice(Invoice invoice) throws AxelorException;
+public interface InvoiceService extends com.axelor.apps.account.service.invoice.InvoiceService {
 
   void setInvoiceAttrs(Invoice invoice);
 }

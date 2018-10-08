@@ -38,35 +38,28 @@ public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.
   }
 
   @Override
-  public Invoice calculateInvoice(Invoice invoice) throws AxelorException {
-    // BigDecimal exTaxTotal = BigDecimal.ZERO;
+  public Invoice compute(Invoice invoice) throws AxelorException {
     BigDecimal netSgst = BigDecimal.ZERO;
     BigDecimal netCgst = BigDecimal.ZERO;
     BigDecimal netIgst = BigDecimal.ZERO;
-    // BigDecimal inTaxTotal = BigDecimal.ZERO;
     List<InvoiceLine> invoiceItems = invoice.getInvoiceLineList();
 
     if (invoiceItems != null) {
       for (InvoiceLine invoiceLine : invoiceItems) {
-        // exTaxTotal = exTaxTotal.add(invoiceLine.getExTaxTotal());
         netSgst = netSgst.add(invoiceLine.getSgst());
         netCgst = netCgst.add(invoiceLine.getCgst());
         netIgst = netIgst.add(invoiceLine.getIgst());
-        // inTaxTotal = inTaxTotal.add(invoiceLine.getInTaxTotal());
       }
     }
     invoice.setNetSgst(netSgst);
     invoice.setNetIgst(netIgst);
     invoice.setNetCgst(netCgst);
-    if (invoice.getPartner() != null) {
-      invoice = compute(invoice);
+    if (invoice.getPartner() != null && invoice.getInvoiceLineList()!=null) {
+      return super.compute(invoice);
     }
     return invoice;
-    // invoice.setInTaxTotal(inTaxTotal);
-    // invoice.setExTaxTotal(exTaxTotal);
   }
 
-  @Override
   public void setInvoiceAttrs(Invoice invoice) {
     Partner partner = invoice.getPartner();
     List<PartnerAddress> partnerAddressList = new ArrayList<PartnerAddress>();
