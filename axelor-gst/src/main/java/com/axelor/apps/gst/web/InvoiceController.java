@@ -1,14 +1,18 @@
-package com.axelor.gst.web;
+package com.axelor.apps.gst.web;
 
 import com.axelor.app.AppSettings;
+import com.axelor.apps.ReportFactory;
 import com.axelor.apps.account.db.Invoice;
 import com.axelor.apps.account.db.InvoiceLine;
 import com.axelor.apps.account.db.InvoiceLineTax;
 import com.axelor.apps.account.db.TaxLine;
+import com.axelor.apps.gst.report.IReport;
+import com.axelor.apps.gst.service.InvoiceLineService;
+import com.axelor.apps.gst.service.InvoiceService;
+import com.axelor.apps.report.engine.ReportSettings;
 import com.axelor.exception.AxelorException;
 import com.axelor.exception.service.TraceBackService;
-import com.axelor.gst.service.InvoiceLineService;
-import com.axelor.gst.service.InvoiceService;
+import com.axelor.meta.schema.actions.ActionView;
 import com.axelor.rpc.ActionRequest;
 import com.axelor.rpc.ActionResponse;
 import java.io.File;
@@ -36,12 +40,11 @@ public class InvoiceController {
   public void setInvoiceAttrs(ActionRequest request, ActionResponse response) {
     Invoice invoice = request.getContext().asType(Invoice.class);
     invoiceService.setInvoiceAttrs(invoice);
-    //response.setValue("contactPartner", invoice.getContactPartner());
-    //response.setValue("address", invoice.getAddress());
     response.setValue("shippingAddress", invoice.getShippingAddress());
   }
 
-  public void setInvoiceLineAttrs(ActionRequest request, ActionResponse response) {
+  public void setInvoiceLineAttrs(ActionRequest request, ActionResponse response)
+      throws AxelorException {
     Invoice invoice = request.getContext().asType(Invoice.class);
     if (invoice.getInvoiceLineList() != null) {
       for (InvoiceLine invoiceLine : invoice.getInvoiceLineList()) {
@@ -57,7 +60,6 @@ public class InvoiceController {
     invoiceLineList = (List<InvoiceLine>) request.getContext().get("invoiceLineList");
     List<InvoiceLineTax> invoiceLineTaxList = new ArrayList<InvoiceLineTax>();
     InvoiceLineTax invoiceLineTax = new InvoiceLineTax();
-    // Invoice invoice=request.getContext().asType(Invoice.class);
     TaxLine taxLine = null;
 
     if (invoiceLineList != null) {
@@ -78,5 +80,20 @@ public class InvoiceController {
     String imagePath = AppSettings.get().getPath("file.upload.dir", "");
     imagePath = imagePath.endsWith(File.separator) ? imagePath : imagePath + File.separator;
     request.getContext().put("imagePath", imagePath);
+  }
+
+  public void printInvoice(ActionRequest request, ActionResponse response) throws AxelorException {
+    Invoice invoice = request.getContext().asType(Invoice.class);
+    String name = "Invoice";
+    String fileLink =
+        ReportFactory.createReport(IReport.INVOICE, name + "-${date}")
+            .addParam("InvoiceId", invoice.getId())
+            .addParam("Locale", ReportSettings.getPrintingLocale(null))
+            .generate()
+            .getFileLink();
+
+    // logger.debug("Printing " + name);
+
+    response.setView(ActionView.define(name).add("html", fileLink).map());
   }
 }

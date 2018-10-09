@@ -129,10 +129,10 @@
 	</action-group>
 	
 	<action-method name="action-invoice-line-attrs">
-		<call class="com.axelor.gst.web.InvoiceLineController" method="setInvoiceItem" />
+		<call class="com.axelor.apps.gst.web.InvoiceLineController" method="setInvoiceItem" />
 	</action-method>
 	<action-method name="action-gst-tax">
-		<call class="com.axelor.gst.web.InvoiceLineController" method="setTaxLine" />
+		<call class="com.axelor.apps.gst.web.InvoiceLineController" method="setTaxLine" />
 	</action-method>
 
 </object-views>

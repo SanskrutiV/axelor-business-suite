@@ -11,9 +11,9 @@
 			<button name="checkDuplicate" title="Check Duplicate"
 				onClick="action-general-check-duplicate-records" />
 			<button name="btnCreateInvoice" title="Create Invoice" icon="fa-plus-square-o"
-				onClick="com.axelor.gst.web.ProductController:setSelectedProductsId" />
+				onClick="com.axelor.apps.gst.web.ProductController:setSelectedProductsId" />
 			<button name="btnPrintProduct" title="Print" icon="fa-print"
-				onClick="com.axelor.gst.web.ProductController:getPrintIds,print-products" />
+				onClick="com.axelor.apps.gst.web.ProductController:getPrintIds,print-products" />
 		</toolbar>
 		<field name="code" x-bind="{{code|unaccent|uppercase}}" width="100" />
 		<field name="name" width="300" />
@@ -125,7 +125,7 @@
 				</panel>
 			</panel>
 		</panel>
-		<panel colSpan="12" if="__config__.app.isApp('gst')">
+		<panel colSpan="12" if="__config__.app.isApp('gst')" title="Gst Rate">
 			<field name="hsbn" />
 			<field name="gstRate" colSpan="6" showTitle="true" />
 		</panel>
@@ -421,7 +421,7 @@
 	</action-group>
 
 	<action-method name="get-product-gst-rate">
-		<call class="com.axelor.gst.web.ProductController" method="setProductGstRate" />
+		<call class="com.axelor.apps.gst.web.ProductController" method="setProductGstRate" />
 	</action-method>
 	<action-report output="Product" name="print-products"
 		design="product.rptdesign">

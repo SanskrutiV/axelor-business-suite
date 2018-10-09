@@ -1,4 +1,4 @@
-package com.axelor.gst.service;
+package com.axelor.apps.gst.service;
 
 import com.axelor.apps.account.db.Invoice;
 import com.axelor.apps.account.db.InvoiceLine;
@@ -54,7 +54,7 @@ public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.
     invoice.setNetSgst(netSgst);
     invoice.setNetIgst(netIgst);
     invoice.setNetCgst(netCgst);
-    if (invoice.getPartner() != null && invoice.getInvoiceLineList()!=null) {
+    if (invoice.getPartner() != null && invoiceItems != null) {
       return super.compute(invoice);
     }
     return invoice;
@@ -62,34 +62,22 @@ public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.
 
   public void setInvoiceAttrs(Invoice invoice) {
     Partner partner = invoice.getPartner();
+
     List<PartnerAddress> partnerAddressList = new ArrayList<PartnerAddress>();
     partnerAddressList = partner.getPartnerAddressList();
-    PartnerAddress invoiceAddress = null;
     PartnerAddress shippingAddress = null;
-    PartnerAddress defaultAddress = null;
     if (!partnerAddressList.isEmpty()) {
       for (PartnerAddress partnerAddress : partnerAddressList) {
-        if (partnerAddress.getIsInvoicingAddr()) {
-          invoiceAddress = partnerAddress;
-        }
-        if (partnerAddress.getIsDeliveryAddr()) {
+        if (invoice.getUseInvoiceAddressAsShippingAddress()
+            && partnerAddress.getIsInvoicingAddr()) {
           shippingAddress = partnerAddress;
+        } else {
+          if (partnerAddress.getIsDeliveryAddr()) {
+            shippingAddress = partnerAddress;
+          }
         }
-        if (partnerAddress.getIsDefaultAddr()) {
-          defaultAddress = partnerAddress;
-        }
-      }
-      if (invoiceAddress == null && defaultAddress != null) {
-        invoiceAddress = defaultAddress;
-      }
-      if (shippingAddress == null && defaultAddress != null) {
-        shippingAddress = defaultAddress;
-      }
-      if (invoice.getUseInvoiceAddressAsShippingAddress()) {
-        shippingAddress = invoiceAddress;
       }
     }
-    invoice.setAddress(invoiceAddress.getAddress());
     invoice.setShippingAddress(shippingAddress.getAddress());
   }
 }

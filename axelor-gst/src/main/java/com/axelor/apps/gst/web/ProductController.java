@@ -1,10 +1,10 @@
-package com.axelor.gst.web;
+package com.axelor.apps.gst.web;
 
 import com.axelor.app.AppSettings;
 import com.axelor.apps.account.db.Invoice;
 import com.axelor.apps.account.db.InvoiceLine;
 import com.axelor.apps.base.db.Product;
-import com.axelor.gst.service.ProductService;
+import com.axelor.apps.gst.service.ProductService;
 import com.axelor.meta.schema.actions.ActionView;
 import com.axelor.rpc.ActionRequest;
 import com.axelor.rpc.ActionResponse;

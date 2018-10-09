@@ -24,8 +24,8 @@
 					action="action-invoice-business-project-method-print-annex"
 					showIf="partner != null &amp;&amp; (displayTimesheetOnPrinting || displayExpenseOnPrinting)"
 					if-module="axelor-business-project" />
-				<item action="get-image-path,print-invoice" title="Print Invoice(GST)"
-					showIf="id &amp;&amp; __config__.app.isApp('gst')" />
+				<item action="action-method-print-invoice" title="Print Invoice(GST)"
+					showIf="id" />
 			</menu>
 
 			<menu title="Tools" icon="fa-wrench" showTitle="true">
@@ -33,6 +33,7 @@
 					readonlyIf="partner == null" />
 			</menu>
 		</menubar>
+		
 		<panel>
 			<field name="printedPDF" hidden="true" /><!-- Needed to be able 
 				to use it in menu -->
@@ -114,7 +115,7 @@
 		</panel>
 
 		<panel title="Invoicing informations" hideIf="company == null">
-			<field name="partner" readonlyIf="statusSelect != 1 || invoiceLineList.length > 0"
+			<field name="partner" readonlyIf="statusSelect != 1"
 				onChange="action-group-account-invoice-partner-onchange,action-method-invoice-address-str,action-group-gst-invoice-company-partner-onchange"
 				onSelect="action-set-partner-domain" form-view="partner-form"
 				grid-view="partner-grid" />
@@ -164,7 +165,7 @@
 			<field name="subscriptionToDate" />
 		</panel>
 
-		<panel-tabs hideIf="partner == null">
+		<panel-tabs hideIf="false">
 			<panel name="invoiceContent" title="Invoice content" showTitle="false">
 				<panel-related field="invoiceLineList" canNew="statusSelect == 1"
 					canRemove="statusSelect == 1" readonlyIf="statusSelect == 3 || partner == null"
@@ -356,7 +357,7 @@
 		         </dl>]]>
 			</viewer>
 			</field>
-			<field name="$paymentVouchersOnInvoice" type="boolean" hidden="true" />
+			<field name="$paymentVouchersOnInvoice" type="boolean" hidde="true" />
 			<field name="invoicePaymentList" showTitle="false" readonly="true"
 				colSpan="12" css="order-subtotal">
 				<viewer
@@ -385,7 +386,13 @@
 			<field name="inTaxTotal" css="order-subtotal" showTitle="false"
 				colSpan="12" showIf="statusSelect == 2 || statusSelect == 3">
 				<viewer depends="amountRemaining,currency.symbol"><![CDATA[
-		         <dl class="dl-horizontal">
+		         <dl class="dl-horizontal"><toolbar><toolbar>
+			<button name="btnPrintInvoice" title="Print" icon="fa-print"
+				onClick="get-image-path,print-invoice" showIf="id " />
+		</toolbar>
+			<button name="btnPrintInvoice" title="Print" icon="fa-print"
+				onClick="get-image-path,print-invoice" showIf="id " />
+		</toolbar>
 		           <dt class="order-subtotal-total" x-translate>Amount due</dt>
 		           <dd class="order-subtotal-total">{{record.amountRemaining}} {{record.currency.symbol}}</dd>
 		         </dl>]]>
@@ -448,40 +455,35 @@
 	</kanban>
 
 	<action-group name="action-group-gst-invoice-onnew-group">
-		<action name="set-invoice-line-list" if="__config__.app.isApp('gst')" />
-		<action name="set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
-		<action name="calculate-invoice" if="__config__.app.isApp('gst')" />
+		<action name="action-method-create-invoice-line-list" if="__config__.app.isApp('gst')" />
+		<action name="action-method-set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
+		<action name="action-method-calculate-invoice" if="__config__.app.isApp('gst')" />
 	</action-group>
 
 	<action-group name="action-group-gst-invoice-company-partner-onchange">
-		<action name="set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
-		<action name="calculate-invoice" if="__config__.app.isApp('gst')" />
+		<action name="action-method-set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
+		<action name="action-method-calculate-invoice" if="__config__.app.isApp('gst')" />
+		<action name="action-method-set-invoice-attrs"  if="__config__.app.isApp('gst')"/>
 	</action-group>
 
 	<action-group name="action-group-gst-invoice-invoiceline-change">
-		<action name="calculate-invoice" if="__config__.app.isApp('gst')" />
+		<action name="action-method-calculate-invoice" if="__config__.app.isApp('gst')" />
 	</action-group>
 
-	<action-method name="set-invoice-line-list">
-		<call class="com.axelor.gst.web.InvoiceController" method="setInvoiceLineList" />
+	<action-method name="action-method-create-invoice-line-list">
+		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceLineList" />
 	</action-method>
-	<action-method name="set-invoice-line-attrs">
-		<call class="com.axelor.gst.web.InvoiceController" method="setInvoiceLineAttrs" />
+	<action-method name="action-method-set-invoice-line-attrs">
+		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceLineAttrs" />
 	</action-method>
-	<action-method name="calculate-invoice">
-		<call class="com.axelor.gst.web.InvoiceController" method="calculateInvoice" />
+	<action-method name="action-method-calculate-invoice">
+		<call class="com.axelor.apps.gst.web.InvoiceController" method="calculateInvoice" />
 	</action-method>
-
-
-	<!-- report parameters -->
-
-	<action-method name="get-image-path">
-		<call class="com.axelor.gst.web.InvoiceController" method="setImagePath" />
+	<action-method name="action-method-set-invoice-attrs">
+		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceAttrs" />
 	</action-method>
-	<action-report output="Invoice" name="print-invoice"
-		design="invoice.rptdesign">
-		<param name="id" expr="eval: __self__?.id" />
-		<param name="imagePath" expr="eval: imagePath" />
-	</action-report>
+	<action-method name="action-method-print-invoice">
+		<call class="com.axelor.apps.gst.web.InvoiceController" method="printInvoice" />
+	</action-method>
 
 </object-views>
