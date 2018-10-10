@@ -114,7 +114,8 @@
 					grid-view="purchase-order-line-grid" />
 			</panel>
 		</panel-tabs>
-		<panel colSpan="12" title="Other Details" css="panel-yellow" if="__config__.app.isApp('gst')">
+		<panel colSpan="12" title="Other Details" css="panel-yellow"
+			if="__config__.app.isApp('gst')">
 			<field name="hsbn" colSpan="6" />
 			<field name="gstRate" colSpan="6" />
 			<field name="igst" colSpan="6" />
@@ -124,15 +125,23 @@
 	</form>
 
 	<action-group name="action-group-gst-invoice-line-attrs">
-		<action name="action-invoice-line-attrs" if="__config__.app.isApp('gst')"/>
-		<action name="action-gst-tax" if="__config__.app.isApp('gst')"/>
+		<action name="action-attrs-invoice-line" if="__config__.app.isApp('gst')" />
+		<action name="action-method-invoice-line-gst"/>
+		<action name="action-method-invoice-line-tax" if="__config__.app.isApp('gst')" />
 	</action-group>
+
+	<action-attrs name="action-attrs-invoice-line">
+		<attribute name="value" for="gstRate"
+			expr="eval:__this__?.product?.gstRate" />
+	</action-attrs>
 	
-	<action-method name="action-invoice-line-attrs">
-		<call class="com.axelor.apps.gst.web.InvoiceLineController" method="setInvoiceItem" />
+	<action-method name="action-method-invoice-line-gst">
+		<call class="com.axelor.apps.gst.web.InvoiceLineController"
+			method="setInvoiceItem" />
 	</action-method>
-	<action-method name="action-gst-tax">
-		<call class="com.axelor.apps.gst.web.InvoiceLineController" method="setTaxLine" />
+	<action-method name="action-method-invoice-line-tax">
+		<call class="com.axelor.apps.gst.web.InvoiceLineController"
+			method="setTaxLine" />
 	</action-method>
 
 </object-views>

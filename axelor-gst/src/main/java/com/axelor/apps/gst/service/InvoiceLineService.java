@@ -9,8 +9,6 @@ public interface InvoiceLineService {
 
   void calculateInvoiceItem(InvoiceLine invoiceLine, Invoice invoice) throws AxelorException;
 
-  void updateInvoiceItem(InvoiceLine invoiceLine);
-
   void setInvoiceLine(InvoiceLine invoiceLine);
 
   TaxLine getTextLine(InvoiceLine invoiceLine);

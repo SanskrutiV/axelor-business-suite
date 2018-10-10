@@ -52,6 +52,7 @@ public class InvoiceServiceProjectImpl extends InvoiceServiceSupplychainImpl {
         alarmEngineService,
         invoiceRepo,
         appAccountService);
+    // TODO Auto-generated constructor stub
   }
 
   public List<String> editInvoiceAnnex(Invoice invoice, String invoiceIds, boolean toAttach)

@@ -93,6 +93,12 @@
                     <text-property name="displayName">cost_price</text-property>
                     <text-property name="heading">cost_price</text-property>
                 </structure>
+                <structure>
+                    <property name="columnName">gst_rate</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">gst_rate</text-property>
+                    <text-property name="heading">gst_rate</text-property>
+                </structure>
             </list-property>
             <list-property name="parameters">
                 <structure>
@@ -136,6 +142,11 @@
                     <structure>
                         <property name="position">6</property>
                         <property name="name">cost_price</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">gst_rate</property>
                         <property name="dataType">decimal</property>
                     </structure>
                 </list-property>
@@ -184,9 +195,16 @@
                     <property name="dataType">decimal</property>
                     <property name="nativeDataType">2</property>
                 </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">gst_rate</property>
+                    <property name="nativeName">gst_rate</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">2</property>
+                </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select gp.id,gp.code,gp.name,gp.hsbn,
-gp.sale_price,gp.cost_price
+gp.sale_price,gp.cost_price,gp.gst_rate
 from public.base_product gp
 where gp.id=any(string_to_array(?, ',')::int[]);]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -633,6 +651,12 @@ gp.id=?
                     <expression name="expression" type="javascript">dataSetRow["id"]</expression>
                     <property name="dataType">decimal</property>
                 </structure>
+                <structure>
+                    <property name="name">gst_rate</property>
+                    <text-property name="displayName">gst_rate</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["gst_rate"]</expression>
+                    <property name="dataType">decimal</property>
+                </structure>
             </list-property>
             <column id="138">
                 <property name="fontSize">14pt</property>
@@ -654,7 +678,7 @@ gp.id=?
                 <row id="179">
                     <cell id="180">
                         <property name="colSpan">1</property>
-                        <property name="rowSpan">3</property>
+                        <property name="rowSpan">2</property>
                         <image id="199">
                             <property name="height">1.2708333333333333in</property>
                             <property name="width">1.9479166666666667in</property>
@@ -682,7 +706,7 @@ gp.id=?
                     </cell>
                     <cell id="181">
                         <property name="colSpan">3</property>
-                        <property name="rowSpan">3</property>
+                        <property name="rowSpan">2</property>
                         <data id="186">
                             <property name="resultSetColumn">code</property>
                         </data>
@@ -692,12 +716,13 @@ gp.id=?
                         <data id="217">
                             <property name="resultSetColumn">hsbn</property>
                         </data>
+                        <text id="225">
+                            <property name="contentType">html</property>
+                            <text-property name="content"><![CDATA[GST Rate : <VALUE-OF>row["gst_rate"]</VALUE-OF>]]></text-property>
+                        </text>
                     </cell>
                 </row>
                 <row id="118"/>
-                <row id="172">
-                    <property name="height">1.46875in</property>
-                </row>
                 <row id="165">
                     <property name="height">0.4375in</property>
                     <cell id="166">

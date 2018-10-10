@@ -22,14 +22,14 @@ public class InvoiceLineController {
     InvoiceLine invoiceLine = request.getContext().asType(InvoiceLine.class);
     Invoice invoice = request.getContext().getParent().asType(Invoice.class);
     if (invoiceLine.getProduct() != null) {
-      invoiceLineService.updateInvoiceItem(invoiceLine);
+      // invoiceLineService.updateInvoiceItem(invoiceLine);
       if (invoice.getAddress() != null) {
         invoiceLineService.calculateInvoiceItem(invoiceLine, invoice);
         response.setValue("igst", invoiceLine.getIgst());
         response.setValue("cgst", invoiceLine.getCgst());
         response.setValue("sgst", invoiceLine.getSgst());
       }
-      response.setValue("gstRate", invoiceLine.getGstRate());
+      // response.setValue("gstRate", invoiceLine.getGstRate());
     } else {
       response.setValue("igst", BigDecimal.ZERO);
       response.setValue("cgst", BigDecimal.ZERO);

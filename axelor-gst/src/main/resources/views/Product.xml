@@ -11,9 +11,9 @@
 			<button name="checkDuplicate" title="Check Duplicate"
 				onClick="action-general-check-duplicate-records" />
 			<button name="btnCreateInvoice" title="Create Invoice" icon="fa-plus-square-o"
-				onClick="com.axelor.apps.gst.web.ProductController:setSelectedProductsId" />
+				onClick="action-method-invoice-create" />
 			<button name="btnPrintProduct" title="Print" icon="fa-print"
-				onClick="com.axelor.apps.gst.web.ProductController:getPrintIds,print-products" />
+				onClick="action-method-product-print" />
 		</toolbar>
 		<field name="code" x-bind="{{code|unaccent|uppercase}}" width="100" />
 		<field name="name" width="300" />
@@ -107,7 +107,7 @@
 						form-view="product-family-form" grid-view="product-family-grid" />
 					<field name="productCategory" canEdit="false" colSpan="12"
 						domain="self.productFamily = :productFamily" form-view="product-category-form"
-						grid-view="product-category-grid" onChange="action-group-gst-product-set-gstrate" />
+						grid-view="product-category-grid" onChange="action-attrs-product-category-onChange" />
 				</panel>
 				<panel colSpan="12">
 					<field name="inAti" colSpan="6"
@@ -416,17 +416,17 @@
 		</panel-mail>
 	</form>
 
-	<action-group name="action-group-gst-product-set-gstrate">
-		<action name="get-product-gst-rate" if="__config__.app.isApp('gst')" />
-	</action-group>
-
-	<action-method name="get-product-gst-rate">
-		<call class="com.axelor.apps.gst.web.ProductController" method="setProductGstRate" />
+	<action-method name="action-method-product-print">
+		<call class="com.axelor.apps.gst.web.ProductController" method="printProducts" />
 	</action-method>
-	<action-report output="Product" name="print-products"
-		design="product.rptdesign">
-		<param name="selectedProducts" expr="eval: selectedProducts" />
-		<param name="path" expr="eval: path" />
-	</action-report>
+
+	<action-attrs name="action-attrs-product-category-onChange">
+		<attribute name="value" for="gstRate"
+			expr="eval:__this__?.productCategory?.gstRate" />
+	</action-attrs>
+
+	<action-method name="action-method-invoice-create">
+		<call class="com.axelor.apps.gst.web.ProductController" method="createInvoice" />
+	</action-method>
 
 </object-views>

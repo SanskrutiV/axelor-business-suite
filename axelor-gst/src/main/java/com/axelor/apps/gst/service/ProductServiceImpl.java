@@ -2,11 +2,9 @@ package com.axelor.apps.gst.service;
 
 import com.axelor.apps.account.db.InvoiceLine;
 import com.axelor.apps.base.db.Product;
-import com.axelor.apps.base.db.ProductCategory;
 import com.axelor.apps.base.db.repo.ProductCategoryRepository;
 import com.axelor.apps.base.db.repo.ProductRepository;
 import com.google.inject.persist.Transactional;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -16,13 +14,6 @@ public class ProductServiceImpl implements ProductService {
   @Inject ProductCategoryRepository productCategoryRepo;
 
   @Inject ProductRepository productRepo;
-
-  @Override
-  public BigDecimal getGstRate(Product product) {
-    ProductCategory productCategory = product.getProductCategory();
-    BigDecimal gstRate = productCategoryRepo.findByName(productCategory.getName()).getGstRate();
-    return gstRate;
-  }
 
   @Override
   public List<Integer> getAllProductIds() {
@@ -47,7 +38,6 @@ public class ProductServiceImpl implements ProductService {
       invoiceLine.setPrice(product.getSalePrice());
       invoiceLine.setExTaxTotal(invoiceLine.getPrice().multiply(invoiceLine.getQty()));
       invoiceLine.setInTaxTotal(invoiceLine.getExTaxTotal());
-      String string = product.getName() + "[" + product.getCode() + "]";
       invoiceItems.add(invoiceLine);
     }
     return invoiceItems;

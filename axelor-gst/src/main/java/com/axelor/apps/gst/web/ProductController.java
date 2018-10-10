@@ -1,15 +1,16 @@
 package com.axelor.apps.gst.web;
 
 import com.axelor.app.AppSettings;
+import com.axelor.apps.ReportFactory;
 import com.axelor.apps.account.db.Invoice;
 import com.axelor.apps.account.db.InvoiceLine;
-import com.axelor.apps.base.db.Product;
+import com.axelor.apps.gst.report.IReport;
 import com.axelor.apps.gst.service.ProductService;
+import com.axelor.exception.AxelorException;
 import com.axelor.meta.schema.actions.ActionView;
 import com.axelor.rpc.ActionRequest;
 import com.axelor.rpc.ActionResponse;
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -17,13 +18,7 @@ import javax.inject.Inject;
 public class ProductController {
   @Inject ProductService productService;
 
-  public void setProductGstRate(ActionRequest request, ActionResponse response) {
-    Product product = request.getContext().asType(Product.class);
-    BigDecimal gstRate = productService.getGstRate(product);
-    response.setValue("gstRate", gstRate);
-  }
-
-  public void getPrintIds(ActionRequest request, ActionResponse response) {
+  public void printProducts(ActionRequest request, ActionResponse response) throws AxelorException {
     @SuppressWarnings("unchecked")
     List<Integer> selectedProductsIds =
         (List<Integer>) request.getContext().getOrDefault("_ids", new ArrayList<Integer>());
@@ -32,14 +27,19 @@ public class ProductController {
       selectedProductsIds = productService.getAllProductIds();
     }
     selectedProducts = productService.getProductIdsString(selectedProductsIds);
-    request.getContext().put("selectedProducts", selectedProducts);
-
     String path = AppSettings.get().getPath("file.upload.dir", "");
     path = path.endsWith(File.separator) ? path : path + File.separator;
-    request.getContext().put("path", path);
+    String name = "Products";
+    String fileLink =
+        ReportFactory.createReport(IReport.PRODUCT, name + "-${date}")
+            .addParam("selectedProducts", selectedProducts)
+            .addParam("path", path)
+            .generate()
+            .getFileLink();
+    response.setView(ActionView.define(name).add("html", fileLink).map());
   }
 
-  public void setSelectedProductsId(ActionRequest request, ActionResponse response) {
+  public void createInvoice(ActionRequest request, ActionResponse response) {
     @SuppressWarnings("unchecked")
     List<Integer> selectedProductIds =
         (List<Integer>) request.getContext().getOrDefault("_ids", new ArrayList<Integer>());

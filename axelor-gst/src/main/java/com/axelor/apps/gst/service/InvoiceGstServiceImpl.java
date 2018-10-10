@@ -10,17 +10,17 @@ import com.axelor.apps.account.service.invoice.factory.VentilateFactory;
 import com.axelor.apps.base.db.Partner;
 import com.axelor.apps.base.db.PartnerAddress;
 import com.axelor.apps.base.service.alarm.AlarmEngineService;
+import com.axelor.apps.businessproject.service.InvoiceServiceProjectImpl;
 import com.axelor.exception.AxelorException;
 import com.google.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.InvoiceServiceImpl
-    implements InvoiceService {
+public class InvoiceGstServiceImpl extends InvoiceServiceProjectImpl implements InvoiceService {
 
   @Inject
-  public InvoiceServiceImpl(
+  public InvoiceGstServiceImpl(
       ValidateFactory validateFactory,
       VentilateFactory ventilateFactory,
       CancelFactory cancelFactory,
@@ -43,6 +43,9 @@ public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.
     BigDecimal netCgst = BigDecimal.ZERO;
     BigDecimal netIgst = BigDecimal.ZERO;
     List<InvoiceLine> invoiceItems = invoice.getInvoiceLineList();
+    if (invoice.getPartner() != null && invoiceItems != null) {
+      invoice = super.compute(invoice);
+    }
 
     if (invoiceItems != null) {
       for (InvoiceLine invoiceLine : invoiceItems) {
@@ -54,9 +57,7 @@ public class InvoiceServiceImpl extends com.axelor.apps.account.service.invoice.
     invoice.setNetSgst(netSgst);
     invoice.setNetIgst(netIgst);
     invoice.setNetCgst(netCgst);
-    if (invoice.getPartner() != null && invoiceItems != null) {
-      return super.compute(invoice);
-    }
+
     return invoice;
   }
 

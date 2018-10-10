@@ -435,7 +435,6 @@
 		</panel-mail>
 	</form>
 
-
 	<kanban name="invoice-kanban" sequenceBy="priority"
 		model="com.axelor.apps.account.db.Invoice" columnBy="status" title="Invoice">
 		<field name="company" />
@@ -456,14 +455,14 @@
 
 	<action-group name="action-group-gst-invoice-onnew-group">
 		<action name="action-method-create-invoice-line-list" if="__config__.app.isApp('gst')" />
-		<action name="action-method-set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
+		<action name="action-method-invoice-line-attrs" if="__config__.app.isApp('gst')" />
 		<action name="action-method-calculate-invoice" if="__config__.app.isApp('gst')" />
 	</action-group>
 
 	<action-group name="action-group-gst-invoice-company-partner-onchange">
-		<action name="action-method-set-invoice-line-attrs" if="__config__.app.isApp('gst')" />
+		<action name="action-method-invoice-line-attrs" if="__config__.app.isApp('gst')" />
 		<action name="action-method-calculate-invoice" if="__config__.app.isApp('gst')" />
-		<action name="action-method-set-invoice-attrs"  if="__config__.app.isApp('gst')"/>
+		<action name="action-method-invoice-attrs"  if="__config__.app.isApp('gst')"/>
 	</action-group>
 
 	<action-group name="action-group-gst-invoice-invoiceline-change">
@@ -473,13 +472,13 @@
 	<action-method name="action-method-create-invoice-line-list">
 		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceLineList" />
 	</action-method>
-	<action-method name="action-method-set-invoice-line-attrs">
+	<action-method name="action-method-invoice-line-attrs">
 		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceLineAttrs" />
 	</action-method>
 	<action-method name="action-method-calculate-invoice">
 		<call class="com.axelor.apps.gst.web.InvoiceController" method="calculateInvoice" />
 	</action-method>
-	<action-method name="action-method-set-invoice-attrs">
+	<action-method name="action-method-invoice-attrs">
 		<call class="com.axelor.apps.gst.web.InvoiceController" method="setInvoiceAttrs" />
 	</action-method>
 	<action-method name="action-method-print-invoice">
