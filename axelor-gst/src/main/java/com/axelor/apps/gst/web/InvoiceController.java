@@ -22,78 +22,81 @@ import javax.inject.Inject;
 
 public class InvoiceController {
 
-  @Inject InvoiceService invoiceService;
+	@Inject
+	InvoiceService invoiceService;
 
-  @Inject InvoiceLineService invoiceLineService;
+	@Inject
+	InvoiceLineService invoiceLineService;
 
-  public void calculateInvoice(ActionRequest request, ActionResponse response)
-      throws AxelorException {
-    Invoice invoice = request.getContext().asType(Invoice.class);
-    try {
-      invoice = invoiceService.compute(invoice);
-      response.setValues(invoice);
-    } catch (Exception e) {
-      TraceBackService.trace(response, e);
-    }
-  }
+	public void calculateInvoice(ActionRequest request, ActionResponse response) throws AxelorException {
+		Invoice invoice = request.getContext().asType(Invoice.class);
+		try {
+			invoice = invoiceService.compute(invoice);
+			response.setValues(invoice);
+		} catch (Exception e) {
+			TraceBackService.trace(response, e);
+		}
+	}
 
-  public void setInvoiceAttrs(ActionRequest request, ActionResponse response) {
-    Invoice invoice = request.getContext().asType(Invoice.class);
-    invoiceService.setInvoiceAttrs(invoice);
-    response.setValue("shippingAddress", invoice.getShippingAddress());
-  }
+	public void setInvoiceAttrs(ActionRequest request, ActionResponse response) {
+		Invoice invoice = request.getContext().asType(Invoice.class);
+		invoiceService.setInvoiceAttrs(invoice);
+		response.setValue("shippingAddress", invoice.getShippingAddress());
+	}
 
-  public void setInvoiceLineAttrs(ActionRequest request, ActionResponse response)
-      throws AxelorException {
-    Invoice invoice = request.getContext().asType(Invoice.class);
-    if (invoice.getInvoiceLineList() != null) {
-      for (InvoiceLine invoiceLine : invoice.getInvoiceLineList()) {
-        invoiceLineService.calculateInvoiceItem(invoiceLine, invoice);
-      }
-      response.setValue("invoiceLineList", invoice.getInvoiceLineList());
-    }
-  }
+	public void setInvoiceLineAttrs(ActionRequest request, ActionResponse response) throws AxelorException {
+		Invoice invoice = request.getContext().asType(Invoice.class);
+		if (invoice.getInvoiceLineList() != null) {
+			for (InvoiceLine invoiceLine : invoice.getInvoiceLineList()) {
+				invoiceLineService.calculateInvoiceItem(invoiceLine, invoice);
+			}
+			response.setValue("invoiceLineList", invoice.getInvoiceLineList());
+		}
+	}
 
-  @SuppressWarnings("unchecked")
-  public void setInvoiceLineList(ActionRequest request, ActionResponse response) {
-    List<InvoiceLine> invoiceLineList = new ArrayList<InvoiceLine>();
-    invoiceLineList = (List<InvoiceLine>) request.getContext().get("invoiceLineList");
-    List<InvoiceLineTax> invoiceLineTaxList = new ArrayList<InvoiceLineTax>();
-    InvoiceLineTax invoiceLineTax = new InvoiceLineTax();
-    TaxLine taxLine = null;
+	@SuppressWarnings("unchecked")
+	public void setInvoiceLineList(ActionRequest request, ActionResponse response) {
+		List<InvoiceLine> invoiceLineList = new ArrayList<InvoiceLine>();
+		invoiceLineList = (List<InvoiceLine>) request.getContext().get("invoiceLineList");
+		List<InvoiceLineTax> invoiceLineTaxList = new ArrayList<InvoiceLineTax>();
 
-    if (invoiceLineList != null) {
-      for (InvoiceLine invoiceLine : invoiceLineList) {
-        invoiceLineService.setInvoiceLine(invoiceLine);
-        invoiceLineService.updateInvoiceItem(invoiceLine);
-        taxLine = invoiceLineService.getTextLine(invoiceLine);
-        invoiceLine.setTaxLine(taxLine);
-        invoiceLineTax.setTaxLine(taxLine);
-        invoiceLineTaxList.add(invoiceLineTax);
-      }
-      response.setValue("invoiceLineList", invoiceLineList);
-      response.setValue("invoiceLineTaxList", invoiceLineTaxList);
-    }
-  }
+		TaxLine taxLine = null;
 
-  public void getImagePath(ActionRequest request, ActionResponse response) {
-    String imagePath = AppSettings.get().getPath("file.upload.dir", "");
-    imagePath = imagePath.endsWith(File.separator) ? imagePath : imagePath + File.separator;
-    request.getContext().put("imagePath", imagePath);
-  }
+		if (invoiceLineList != null) {
+			for (InvoiceLine invoiceLine : invoiceLineList) {
+				InvoiceLineTax invoiceLineTax = new InvoiceLineTax();
+				invoiceLineService.setInvoiceLine(invoiceLine);
+				invoiceLineService.updateInvoiceItem(invoiceLine);
+				taxLine = invoiceLineService.getTextLine(invoiceLine);
+				invoiceLine.setTaxLine(taxLine);
+				invoiceLineTax.setTaxLine(taxLine);
+				for(InvoiceLineTax tax:invoiceLineTaxList) {
+					if(tax.getTaxLine().equals(invoiceLineTax.getTaxLine())) {
+						continue;
+					}
+				}
+				invoiceLineTaxList.add(invoiceLineTax);
+			}
+			response.setValue("invoiceLineList", invoiceLineList);
+			response.setValue("invoiceLineTaxList", invoiceLineTaxList);
+		}
+	}
 
-  public void printInvoice(ActionRequest request, ActionResponse response) throws AxelorException {
-    Invoice invoice = request.getContext().asType(Invoice.class);
-    String name = "Invoice";
-    String fileLink =
-        ReportFactory.createReport(IReport.INVOICE, name + "-${date}")
-            .addParam("InvoiceId", invoice.getId())
-            .addParam("Locale", ReportSettings.getPrintingLocale(null))
-            .generate()
-            .getFileLink();
+	public void getImagePath(ActionRequest request, ActionResponse response) {
+		String imagePath = AppSettings.get().getPath("file.upload.dir", "");
+		imagePath = imagePath.endsWith(File.separator) ? imagePath : imagePath + File.separator;
+		request.getContext().put("imagePath", imagePath);
+	}
 
-    // logger.debug("Printing " + name);
+	public void printInvoice(ActionRequest request, ActionResponse response) throws AxelorException {
+		Invoice invoice = request.getContext().asType(Invoice.class);
+		String name = "Invoice";
+		String fileLink = ReportFactory.createReport(IReport.INVOICE, name + "-${date}")
+				.addParam("InvoiceId", invoice.getId()).addParam("Locale", ReportSettings.getPrintingLocale(null))
+				.generate().getFileLink();
 
-    response.setView(ActionView.define(name).add("html", fileLink).map());
-  }
+		// logger.debug("Printing " + name);
+
+		response.setView(ActionView.define(name).add("html", fileLink).map());
+	}
 }
